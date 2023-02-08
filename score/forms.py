@@ -1,16 +1,52 @@
+
 from django import forms
-from .models import Stat
+from .models import Stat, Person
 
 class StatCreateForm(forms.ModelForm):
     class Meta:
         model = Stat
-        fields = ('date', 'total_score', 'ob', 'penalty', 'fw', 'par_on', 'putt')
-        labels = {
-            'date':'日付',
-            'total_score':'スコア',
-            'ob':'OB',
-            'penalty':'ペナルティ数',
-            'fw':'FWキープ率',
-            'par_on':'パーオン率',
-            'putt':'パット数',
+        exclude = ('player',)
+        widgets = {
+            'date': forms.TextInput(attrs={'autocomplete': 'off',
+                                                 'placeholder': 'ラウンド日',
+                                                 'class': 'form-control'}),
+            'total_score': forms.TextInput(attrs={'autocomplete': 'off',
+                                                  'placeholder': 'スコア',
+                                                  'class': 'form-control'}),
+            'ob': forms.TextInput(attrs={'autocomplete': 'off',
+                                                  'placeholder': 'OB数',
+                                                  'class': 'form-control'}),
+            'penalty': forms.TextInput(attrs={'autocomplete': 'off',
+                                                  'placeholder': 'ペナルティ数',
+                                                  'class': 'form-control'}),
+            'fw': forms.TextInput(attrs={'autocomplete': 'off',
+                                                  'placeholder': 'FK率',
+                                                  'class': 'form-control'}),
+            'par_on': forms.TextInput(attrs={'autocomplete': 'off',
+                                                  'placeholder': 'パーオン率',
+                                                  'class': 'form-control'}),
+            'putt': forms.TextInput(attrs={'autocomplete': 'off',
+                                                  'placeholder': 'パット数',
+                                                  'class': 'form-control'}),                                                                                                                                                        
         }
+
+class PersonCreateForm(forms.ModelForm):
+    class Meta:
+        model = Person
+        
+        """
+        fields = '__all__'
+        """
+        exclude = ('login_user',)
+        widgets = {
+            'name': forms.TextInput(attrs={'autocomplete': 'off',
+                                                 'placeholder': '名前',
+                                                 'class': 'form-control'}),                                                                                                                                                     
+        }  
+        
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            for field in self.fields.values():
+                field.widget.attrs["class"] = "form-control"
+                field.widget.attrs["autocomplete"] = "off"

@@ -3,3 +3,11 @@ django-pandas~=0.6.6
 beautifulsoup4
 django-bootstrap4
 django-bootstrap-datepicker-plus
+django-mdeditor~=0.1.18
+Markdown~=3.3.6
+plotly
+django-import-export
+matplotlib
+django[argon2]
+django-bootstrap5
+bulma

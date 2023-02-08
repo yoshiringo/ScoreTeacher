@@ -1,0 +1,14 @@
+{% extends "score/base.html" %}
+{% load django_bootstrap5 %}
+{% block content %}
+<form class="mt-4" method="POST">
+  {% csrf_token %}
+  <div class="row mt-2">
+    <div class="col-md-2">
+      <label class="form-label" for="id_status">プレイヤー名</label>
+      {{ form.as_p }}
+    </div>
+    <div>{{ qryset }}</div>
+  <button class="btn btn-primary mt-5" type="submit">send</button>
+</form>
+{% endblock %}

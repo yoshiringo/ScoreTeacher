@@ -1,14 +1,27 @@
+{% load django_bootstrap5 %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
-      <a class="navbar-brand" href="/">Score Teacher</a>
+      <a class="navbar-brand" href="/score">Score Teacher</a>
       <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <i class="fas fa-bars"></i>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" href="/admin">Admin</a>
+            <a class="nav-link" href="{% url 'score:person_create' %}">
+              <i class="fa fa-plus"></i>
+              プレイヤー追加
+            </a>
           </li>
+          {% if user.is_authenticated %}
+          <li>
+            <a class="nav-link">ユーザ名：{{ user.get_username }}</a>
+          </li>
+          <li>
+            <a class="nav-link" href="{% url 'accounts:logout' %}">
+                <i class="fa fa-fw fa-sign-out"></i>ログアウト</a>
+          </li>
+          {% endif %}
         </ul>
       </div>
     </div>

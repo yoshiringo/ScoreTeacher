@@ -1,16 +1,61 @@
+{% load django_bootstrap5 %}
 <table>
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
     <thead>
         <tr>
-            <th scope="col">#</th>
-            <th scope="col">名前</th>
+            <th scope="col">プレーヤー名</th>
         </tr>
     </thead>
     <tbody>
-        {% for t in person_list %}
-        <tr>
-            <th>{{ t.pk }}</th>
-            <th><a href="{% url 'score:detail' t.pk %}">{{ t.name }}</a></th>
-        </tr>
+        
+        {% for t in persons %}
+            <tr>
+                <th><a href="{% url 'score:detail' t.pk %}" class="text-decoration-none fs-3">{{ t.name }}</a></th>
+                <th>
+                    <button type="button" class="btn btn-rounded btn-sm btn-danger delete-modal-button"
+                    data-mdb-toggle="modal"
+                    data-mdb-target="#personDeleteModal"
+                    data-deleteurl="{% url 'score:person_delete' t.pk %}"
+                    data-name="{{ t.name }}">
+                    Delete
+                    </button>
+                </th>
+            </tr>  
         {% endfor %}
+            
+        {% if user.username not in person_user %}
+            <tr>
+                <th>プレイヤーを追加してください</th>
+            </tr>   
+        {% endif %}   
+        
     </tbody>
 </table>
+
+    
+<nav aria-label="Page navigation example">
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <ul class="pagination">
+        {% if persons.has_previous %}
+            <li class="page-item"><a class="page-link" href="?p={{ persons.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        {% if persons.has_next %}
+            <li class="page-item"><a class="page-link" href="?p={{ persons.next_page_number }}">Next</a></li>
+        {% endif %}
+        {% if persons.has_previous %}
+            {% if persons.previous_page_number != 1 %}
+                <li class="page-item"><a class="page-link" href="?p=1">1</a></li>
+            {% endif %}
+                <li class="page-item"><a class="page-link" href="?p={{ persons.previous_page_number }}">{{ persons.previous_page_number }}</a></li>
+        {% endif %}
+        <li class="page-item"><a class="page-link" href="?p={{ persons.number }}" >{{ persons.number }}</a></li>
+        {% if persons.has_next %}
+            <li class="page-item"><a class="page-link" href="?p={{ persons.next_page_number }}">{{ persons.next_page_number }}</a></li>
+            {% if persons.next_page_number != persons.paginator.num_pages %}
+                <li class="page-item"><a class="page-link" href="?p={{ persons.paginator.num_pages }}">{{ persons.paginator.num_pages }}</a></li>
+            {% endif %}
+        {% endif %}
+    </ul>
+</nav>

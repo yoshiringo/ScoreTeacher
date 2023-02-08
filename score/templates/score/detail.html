@@ -1,16 +1,50 @@
 {% extends "score/base.html" %}
+{% load django_bootstrap5 %}
 {% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <h4 class="navbar-brand">Player: {{ person.name }}</h4>
+  </div>
+</nav>
 
-{% include "score/components/breadcrumbs.html" %}
-
-<h4>{{person.name}}</h4>
 <h4 class="text-center mt-2">Stats</h4>
-{% include "score/components/stat_table.html" %}
 
-<form action="{% url 'score:stat_create' person.pk %}" method="post">
-    {% csrf_token %}
-    {{ stat_create_form.as_p }}
-    <button type="submit" class="btn">Send</button>
+{% include "score/components/stat_table.html" %}
+{% include "score/components/stat_delete_modal.html" %}
+
+<form method="POST"> {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn">Send</button>
 </form>
+{% endblock %}
+
+{% block extrajs %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script type="text/javascript">
+  $(function() {
+    $('#id_date').datepicker({
+      dateFormat: 'yy-mm-dd',
+      firstDay: 1,
+      dayNamesMin: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+      monthNames: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+    });
+  })
+  const deleteModalButtons = document.getElementsByClassName('delete-modal-button');
+
+  const deleteForm = document.getElementById('delete-form');
+  const deleteDate = document.getElementById('delete-date')
+  const deleteTotalscore = document.getElementById('delete-total_score')
+
+  for (const button of deleteModalButtons) {
+    button.addEventListener('click', () => {
+      deleteForm.action = button.dataset.deleteurl;
+      deleteDate.textContent = `Date : ${button.dataset.date}`;
+      deleteTotalscore.textContent =`Totalscore : ${button.dataset.total_score}` ;
+    });
+  }
+</script>
 
 {% endblock %}
