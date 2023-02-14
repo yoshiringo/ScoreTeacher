@@ -1,32 +1,70 @@
 <!DOCTYPE html>
 {% load static %}
+{% load django_bootstrap5 %}
+<link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
+
 <html lang="ja" dir="ltr">
 
 <head>
+{% bootstrap_css %}
+{% bootstrap_javascript %}
 <meta charset="utf-8">
 <title></title>
-<link rel="stylesheet" href='{% static "accounts/style.css" %}'/>
 </head>
 
 <body>
-<h1>新規登録</h1>
 
- {% if AccountCreate %}
-   <h1>登録完了!</h1>
-   <a href="{% url 'accounts:login' %}">ログイン画面へ</a>
- {% else %}
-   <div class="reg">
-   <table class="reg_form">
+<div class="p-3 position-relative start-50 translate-middle-x text-center"><h2>ScoreTeacher</h2></div>
 
-   <form enctype="multipart/form-data" method="post">
-   {% csrf_token %}
-   {{ account_form.as_table }}
-   {{ add_account_form.as_table }}
-   <tr><td></td><td>
-   <input class="btn" type="submit" name="" value="登録">
-   </td></tr>
-   </form>
+<div class="border rounded border-2 border-dark bg-transparent w-50 h-0 position-relative top-0 start-50 translate-middle-x text-center">
+  <body id="backimg" background="{% static 'accounts/img/golf-g69cefbbf7_1920.jpg' %}"></body>
 
-   </table>
-   </div>
- {% endif %}
+  <h2 class="p-2 border-bottom border-1 border-dark shadow">新規登録</h2>
+  <h5 class="p-1">情報を入力して登録</h5>
+  <h3 class="p-1 border-top border-1 border-dark">会員情報</h3>
+  
+  {% if AccountCreate %}
+    <h1>登録完了!</h1>
+  {% else %}
+
+  <form enctype="multipart/form-data" method="post">
+  
+  {% csrf_token %}
+  <ul class="px-0 position-relative start-0">
+    <li class="p-0 border-top border-1 border-dark">
+      <dl class="row row-cols-2 m-0">
+        <dt class="p-3 col my-box fs-5 border-end border-dark position-relative top-50">ユーザー名</dt>
+        <dd class="p-3 col my-box fs-5 position-relative top-50 m-0">{{ account_form.username }}</dd>
+      </dl>
+    </li>
+    <li class="p-0 border-top border-1 border-dark">
+      <dl class="row row-cols-2 m-0">
+        <dt class="p-4 col my-box fs-5 border-end border-dark position-relative top-50">パスワード</dt>
+        <dd class="p-4 col my-box fs-5 position-relative top-50 m-0">{{ account_form.password }}<br><p id="password" class="opacity-50">8文字以上24文字以内の<br>半角英数字のみ入力可能です</p></dd>
+      </dl>
+    </li>
+    <li class="p-0 border-top border-1 border-dark">
+      <dl class="row row-cols-2 m-0">
+        <dt class="p-3 col my-box fs-5 border-end border-dark position-relative top-50">パスワード(確認用)</dt>
+        <dd class="p-3 col my-box fs-5 position-relative top-50 m-0">{{ account_form.confirm_password }}</dd>
+      </dl>
+    </li>
+    <li class="p-3 border-top border-1 border-dark">
+      <dl>
+        <dt>
+          <input class="btn btn btn-danger btn-lg position-relative top-50" type="submit" name="" value="会員登録">
+        </dt>
+      </dl>
+    </li>
+  </ul>
+
+  </form>
+  {% endif %}
+
+</div>
+<div class="position-relative top-0 start-50 translate-middle-x text-center">
+  <a class="btn btn-link m-3 fw-bold" href="{% url 'accounts:login' %}">ログイン画面へ</a>
+</div>
+
+</body>
+

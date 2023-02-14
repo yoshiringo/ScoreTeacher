@@ -26,11 +26,16 @@
   <!-- header -->
   {% include "score/components/header.html" %}
 
+  <div>
+    <img src="{% static 'score/img/green-top.jpeg' %}"  width="100%">
+  </div>
+
   <div class="container pt-5 pb-5">
     <!-- breadcrumbs -->
     {% include "score/components/breadcrumbs.html" %}
     {% block content %}{% endblock %}
   </div>
+
 
   <!-- footer -->
   {% include "score/components/footer.html" %}

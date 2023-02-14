@@ -15,11 +15,11 @@
 <body>
 
 <div>
-   <body class="haikei" background="{% static 'accounts/img/golf-g69cefbbf7_1920.jpg' %}"></body>
+   <body background="{% static 'accounts/img/golf-g69cefbbf7_1920.jpg' %}"></body>
       <div id="content" class="bg-transparent w-50 h-0 position-relative top-0 start-50 translate-middle-x text-center">
          <div class="login">
             {% include "accounts/components/header.html" %}
-            <h1 class="m-4 fs-2 fw-bold text-dark">ログイン画面</h1>
+            <h1 class="p-3 fw-bold text-dark">ログイン画面</h1>
          
             <div class="d-flex justify-content-center fw-bold">
                <form method="post" action="{% url 'accounts:login' %}">

@@ -1,17 +1,20 @@
 {% load django_bootstrap5 %}
+{% load static %}
+
 <table>
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     <thead>
         <tr>
-            <th scope="col">プレーヤー名</th>
+            <th class="p-1 border-bottom border-secondary">プレーヤー名</th>
         </tr>
     </thead>
     <tbody>
         
         {% for t in persons %}
-            <tr>
-                <th><a href="{% url 'score:detail' t.pk %}" class="text-decoration-none fs-3">{{ t.name }}</a></th>
+            <tr class="border-bottom border-secondary">
+                <th class="p-2"><a href="{% url 'score:detail' t.pk %}" class="text-decoration-none fs-3">{{ t.name }}</a></th>
+                <th class="w-50"></th>
                 <th>
                     <button type="button" class="btn btn-rounded btn-sm btn-danger delete-modal-button"
                     data-mdb-toggle="modal"
@@ -34,7 +37,7 @@
 </table>
 
     
-<nav aria-label="Page navigation example">
+<nav class="p-3" aria-label="Page navigation example">
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     <ul class="pagination">
@@ -59,3 +62,5 @@
         {% endif %}
     </ul>
 </nav>
+
+
