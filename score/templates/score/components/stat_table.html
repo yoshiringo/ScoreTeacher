@@ -8,11 +8,11 @@
         {% bootstrap_javascript %}
         <tr>
             <th class="p-1 border-bottom-5 border-primary">ラウンド日</th>
-            <th scope="col">スコア</th>
+            <th>スコア</th>
             <th class="p-1 border-bottom border-primary">OB</th>
-            <th scope="col">ペナルティ</th>
+            <th>ペナルティ</th>
             <th class="p-1 border-bottom border-primary">FWキープ</th>
-            <th scope="col">パーオン</th>
+            <th>パーオン</th>
             <th class="p-1 border-bottom border-primary">パット</th>
 
             <th scope="col"></th>
@@ -38,7 +38,7 @@
                 data-deleteurl="{% url 'score:stat_delete' stat.pk %}"
                 data-date="{{ stat.date|date:'Y-m-d' }}"
                 data-total_score="{{ stat.total_score }}">
-                Delete
+                削除
                 </button>
             </th>
         </tr>
@@ -47,7 +47,7 @@
     <tbody>
         {% if check == False %}
         <tr>
-            <th>スコアを入力してください</th>
+            <th class="p-3 fs-4">スコアを入力してください</th>
         </tr>
         {% else %}
         <tr>

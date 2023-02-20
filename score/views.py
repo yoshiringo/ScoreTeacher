@@ -21,9 +21,10 @@ class PersonList(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        login_user_name = self.request.user.username
-        personlist = Person.objects.filter(login_user=login_user_name)
-        person_user = Person.objects.values_list('login_user', flat=True).filter(login_user=login_user_name)
+        login_user_id = self.request.user.id
+        personlist = Person.objects.filter(login_user=login_user_id)
+        person_user = Person.objects.values_list('login_user', flat=True).filter(login_user=login_user_id)
+
         paginator = Paginator(personlist, 2)
         p = self.request.GET.get('p')
         persons = paginator.get_page(p)
@@ -83,7 +84,7 @@ class PersonCreate(generic.CreateView):
 
     def form_valid(self, form):
         post = form.save(commit=False)
-        post.login_user = self.request.user.username
+        post.login_user = self.request.user.id
         post.save()
 
         return super().form_valid(form)

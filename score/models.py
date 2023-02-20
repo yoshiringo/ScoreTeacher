@@ -16,7 +16,7 @@ COLOR_CHOICES = (('primary', 'primary'),
 
 class Person(models.Model):
     name = models.CharField(max_length=32)
-    login_user = models.CharField(max_length=50, null=True)
+    login_user = models.IntegerField(null=True)
     
     def __str__(self):
         return f'#{self.pk} {self.name}'
