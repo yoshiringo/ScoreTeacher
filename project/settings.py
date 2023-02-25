@@ -156,3 +156,8 @@ BOOTSTRAP4 = {
 LOGIN_URL = '/accounts' 
 LOGIN_REDIRECT_URL = '/score/'
 LOGOUT_REDIRECT_URL='/accounts/login'
+
+SEX = [
+    ("男性", "男性"),
+    ("女性", "女性"),
+]

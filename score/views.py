@@ -10,6 +10,8 @@ import random
 from . import plugin_plotly
 from django.http import HttpResponse
 from django.core.paginator import Paginator
+from .forms import PersonCreateForm
+
 
 # Create your views here.
 
@@ -79,6 +81,9 @@ class PersonCreate(generic.CreateView):
         context = super().get_context_data(**kwargs)
         context['breadcrumbs_list'] = [{'name': 'プレイヤー追加',
                                         'url': ''}]
+        context["persons"]   = Person.objects.all()
+
+        context["sexs"] = [ p[0] for p in Person.sex.field.choices ]
 
         return context
 
