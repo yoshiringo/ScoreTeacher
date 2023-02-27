@@ -1,7 +1,7 @@
 {% load django_bootstrap5 %}
 {% load humanize %}
 
-<table class="table">
+<table class="table fs-5">
     
     <thead>
         {% bootstrap_css %}
@@ -42,19 +42,36 @@
                 </button>
             </th>
         </tr>
+        
         {% endfor %}
     </tbody>
     <tbody>
+        <tr class="fs-4">
+            <th class="fw-bold">平均</th>
+            <th>{{ score_avg }}</th>
+            <th>{{ ob_avg }}</th>
+            <th>{{ penalty_avg }}</th>
+            <th>{{ fw_avg }}%</th>
+            <th>{{ par_on_avg }}%</th>
+            <th>{{ putt_avg }}</th>
+        </tr>
+    </tbody>
+    
+    <tbody>
+        
         {% if check == False %}
         <tr>
             <th class="p-3 fs-4 fw-bold">スコアを入力してください</th>
         </tr>
         {% else %}
+        
         <tr>
             <th><a href="{% url 'score:stat_analyze' person.pk %}">分析結果を表示する</a></th>
         </tr>
         {% endif %}
+        
     </tbody>
+    
 </table>
 
 <nav aria-label="Page navigation example">

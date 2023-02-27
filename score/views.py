@@ -11,6 +11,8 @@ from . import plugin_plotly
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 from .forms import PersonCreateForm
+from django.db.models import Avg
+import re
 
 
 # Create your views here.
@@ -57,6 +59,42 @@ class StatCreate(generic.CreateView):
         p = self.request.GET.get('p')
         stat_p = paginator.get_page(p)
         context["stat_p"] = stat_p
+
+        score_avg = Stat.objects.filter(player=pk).aggregate(Avg("total_score"))
+        score_avg = f'{score_avg}'
+        score_avg = float(score_avg.replace("{'total_score__avg': ", "").replace("}", ""))
+        score_avg = round(score_avg, 1)
+        context["score_avg"] = score_avg
+
+        ob_avg = Stat.objects.filter(player=pk).aggregate(Avg("ob"))
+        ob_avg = f'{ob_avg}'
+        ob_avg = float(ob_avg.replace("{'ob__avg': ", "").replace("}", ""))
+        ob_avg = round(ob_avg, 1)
+        context["ob_avg"] = ob_avg
+
+        penalty_avg = Stat.objects.filter(player=pk).aggregate(Avg("penalty"))
+        penalty_avg = f'{penalty_avg}'
+        penalty_avg = float(penalty_avg.replace("{'penalty__avg': ", "").replace("}", ""))
+        penalty_avg = round(penalty_avg, 1)
+        context["penalty_avg"] = penalty_avg
+
+        fw_avg = Stat.objects.filter(player=pk).aggregate(Avg("fw"))
+        fw_avg = f'{fw_avg}'
+        fw_avg = float(fw_avg.replace("{'fw__avg': ", "").replace("}", ""))
+        fw_avg = round(fw_avg, 1)
+        context["fw_avg"] = fw_avg
+        
+        par_on_avg = Stat.objects.filter(player=pk).aggregate(Avg("par_on"))
+        par_on_avg = f'{par_on_avg}'
+        par_on_avg = float(par_on_avg.replace("{'par_on__avg': ", "").replace("}", ""))
+        par_on_avg = round(par_on_avg, 1)
+        context["par_on_avg"] = par_on_avg
+
+        putt_avg = Stat.objects.filter(player=pk).aggregate(Avg("putt"))
+        putt_avg = f'{putt_avg}'
+        putt_avg = float(putt_avg.replace("{'putt__avg': ", "").replace("}", ""))
+        putt_avg = round(putt_avg, 1)
+        context["putt_avg"] = putt_avg
 
         return context
 
