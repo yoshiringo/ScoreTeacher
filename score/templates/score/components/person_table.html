@@ -26,12 +26,10 @@
                 </th>
             </tr>  
         {% endfor %}
-            
-        {% if user.username not in person_user %}
+
             <tr>
-                <th>プレイヤーを追加してください</th>
+                <th>{{player_add}}</th>
             </tr>   
-        {% endif %}   
         
     </tbody>
 </table>

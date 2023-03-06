@@ -10,4 +10,5 @@ urlpatterns = [
     path("stat_delete/<int:pk>/", views.StatDelete.as_view(), name="stat_delete"),
     path("person_delete/<int:pk>/", views.PersonDelete.as_view(), name="person_delete"),
     path("stat_analyze/<int:pk>/", views.StatAnalyze.as_view(), name="stat_analyze"),
+    path("average/", views.Average.as_view(), name="average"),
 ]

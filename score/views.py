@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from .forms import PersonCreateForm
 from django.db.models import Avg
-import re
+
 
 
 # Create your views here.
@@ -28,6 +28,9 @@ class PersonList(generic.ListView):
         login_user_id = self.request.user.id
         personlist = Person.objects.filter(login_user=login_user_id)
         person_user = Person.objects.values_list('login_user', flat=True).filter(login_user=login_user_id)
+        if person_user.exists() == False:
+            player_add = "プレイヤーを追加してください"
+            context["player_add"] = player_add 
 
         paginator = Paginator(personlist, 2)
         p = self.request.GET.get('p')
@@ -62,40 +65,52 @@ class StatCreate(generic.CreateView):
 
         score_avg = Stat.objects.filter(player=pk).aggregate(Avg("total_score"))
         score_avg = f'{score_avg}'
-        score_avg = float(score_avg.replace("{'total_score__avg': ", "").replace("}", ""))
-        score_avg = round(score_avg, 1)
-        context["score_avg"] = score_avg
-
+        score_avg_check = any(map(str.isdigit, score_avg))
+        if score_avg_check == True:
+            score_avg = float(score_avg.replace("{'total_score__avg': ", "").replace("}", ""))
+            score_avg = round(score_avg, 1)
+            context["score_avg"] = score_avg
+                    
         ob_avg = Stat.objects.filter(player=pk).aggregate(Avg("ob"))
         ob_avg = f'{ob_avg}'
-        ob_avg = float(ob_avg.replace("{'ob__avg': ", "").replace("}", ""))
-        ob_avg = round(ob_avg, 1)
-        context["ob_avg"] = ob_avg
+        ob_avg_check = any(map(str.isdigit, ob_avg))
+        if  ob_avg_check == True:
+            ob_avg = float(ob_avg.replace("{'ob__avg': ", "").replace("}", ""))
+            ob_avg = round(ob_avg, 1)
+            context["ob_avg"] = ob_avg
 
         penalty_avg = Stat.objects.filter(player=pk).aggregate(Avg("penalty"))
         penalty_avg = f'{penalty_avg}'
-        penalty_avg = float(penalty_avg.replace("{'penalty__avg': ", "").replace("}", ""))
-        penalty_avg = round(penalty_avg, 1)
-        context["penalty_avg"] = penalty_avg
+        score_avg_check = any(map(str.isdigit, penalty_avg))
+        if  score_avg_check == True:
+            penalty_avg = float(penalty_avg.replace("{'penalty__avg': ", "").replace("}", ""))
+            penalty_avg = round(penalty_avg, 1)
+            context["penalty_avg"] = penalty_avg
 
         fw_avg = Stat.objects.filter(player=pk).aggregate(Avg("fw"))
         fw_avg = f'{fw_avg}'
-        fw_avg = float(fw_avg.replace("{'fw__avg': ", "").replace("}", ""))
-        fw_avg = round(fw_avg, 1)
-        context["fw_avg"] = fw_avg
+        score_avg_check = any(map(str.isdigit, fw_avg))
+        if  score_avg_check == True:
+            fw_avg = float(fw_avg.replace("{'fw__avg': ", "").replace("}", ""))
+            fw_avg = round(fw_avg, 1)
+            context["fw_avg"] = fw_avg
         
         par_on_avg = Stat.objects.filter(player=pk).aggregate(Avg("par_on"))
         par_on_avg = f'{par_on_avg}'
-        par_on_avg = float(par_on_avg.replace("{'par_on__avg': ", "").replace("}", ""))
-        par_on_avg = round(par_on_avg, 1)
-        context["par_on_avg"] = par_on_avg
+        score_avg_check = any(map(str.isdigit, par_on_avg))
+        if  score_avg_check == True:
+            par_on_avg = float(par_on_avg.replace("{'par_on__avg': ", "").replace("}", ""))
+            par_on_avg = round(par_on_avg, 1)
+            context["par_on_avg"] = par_on_avg
 
         putt_avg = Stat.objects.filter(player=pk).aggregate(Avg("putt"))
         putt_avg = f'{putt_avg}'
-        putt_avg = float(putt_avg.replace("{'putt__avg': ", "").replace("}", ""))
-        putt_avg = round(putt_avg, 1)
-        context["putt_avg"] = putt_avg
-
+        score_avg_check = any(map(str.isdigit, putt_avg))
+        if  score_avg_check == True:
+            putt_avg = float(putt_avg.replace("{'putt__avg': ", "").replace("}", ""))
+            putt_avg = round(putt_avg, 1)
+            context["putt_avg"] = putt_avg
+        
         return context
 
     def form_valid(self, form):
@@ -188,7 +203,6 @@ class StatAnalyze(generic.DetailView):
         result = practice[0][0],practice[1][0],practice[2][0],practice[3][0],practice[4][0]
         number = practice[0][1],practice[1][1],practice[2][1],practice[3][1],practice[4][1]
 
-
         result_a = f'{result}'
         result_b = result_a.translate(str.maketrans({"(": "", ")": "", "'": ""}))
         
@@ -216,3 +230,42 @@ class PersonDelete(generic.DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('score:person_list')
+
+class Average(generic.ListView):
+    model = Stat
+    template_name = "score/average.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        df_male = pd.DataFrame(Stat.objects.filter(player__sex="男性").values())
+        df_female = pd.DataFrame(Stat.objects.filter(player__sex="女性").values())
+        male_score_avgs = round(df_male[["player_id","total_score"]].groupby("player_id").mean()["total_score"].mean(), 1)
+        male_ob_avgs = round(df_male[["player_id","ob"]].groupby("player_id").mean()["ob"].mean(), 1)
+        male_penalty_avgs = round(df_male[["player_id","penalty"]].groupby("player_id").mean()["penalty"].mean(), 1)
+        male_fw_avgs = round(df_male[["player_id","fw"]].groupby("player_id").mean()["fw"].mean(), 1)
+        male_par_on_avgs = round(df_male[["player_id","par_on"]].groupby("player_id").mean()["par_on"].mean(), 1)
+        male_putt_avgs = round(df_male[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
+
+        female_score_avgs = round(df_female[["player_id","total_score"]].groupby("player_id").mean()["total_score"].mean(), 1)
+        female_ob_avgs = round(df_female[["player_id","ob"]].groupby("player_id").mean()["ob"].mean(), 1)
+        female_penalty_avgs = round(df_female[["player_id","penalty"]].groupby("player_id").mean()["penalty"].mean(), 1)
+        female_fw_avgs = round(df_female[["player_id","fw"]].groupby("player_id").mean()["fw"].mean(), 1)
+        female_par_on_avgs = round(df_female[["player_id","par_on"]].groupby("player_id").mean()["par_on"].mean(), 1)
+        female_putt_avgs = round(df_female[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
+
+        context["male_score_avgs"] = male_score_avgs
+        context["male_ob_avgs"] = male_ob_avgs
+        context["male_penalty_avgs"] = male_penalty_avgs
+        context["male_fw_avgs"] = male_fw_avgs
+        context["male_par_on_avgs"] = male_par_on_avgs
+        context["male_putt_avgs"] = male_putt_avgs
+
+        context["female_score_avgs"] = female_score_avgs
+        context["female_ob_avgs"] = female_ob_avgs
+        context["female_penalty_avgs"] = female_penalty_avgs
+        context["female_fw_avgs"] = female_fw_avgs
+        context["female_par_on_avgs"] = female_par_on_avgs
+        context["female_putt_avgs"] = female_putt_avgs
+
+        return context
