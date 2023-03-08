@@ -2,28 +2,184 @@
 {% load django_bootstrap5 %}
 {% block content %}
 
-<h1>男性平均</h1>
-<p>スコア:{{male_score_avgs}}</p>
-<p>OB:{{male_ob_avgs}}回</p>
-<p>ペナルティ率:{{male_penalty_avgs}}%</p>
-<p>フェアウェイキープ率:{{male_fw_avgs}}%</p>
-<p>パーオン率:{{male_par_on_avgs}}%</p>
-<p>パット数:{{male_putt_avgs}}</p>
+<table class="table fs-5">
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <thead>
+        <tr>
+            <th class="p-1 border-bottom-5 border-primary"></th>
+            <th>スコア</th>
+            <th class="p-1 border-bottom border-primary">OB数</th>
+            <th>ペナルティ率</th>
+            <th class="p-1 border-bottom border-primary">フェアウェイキープ率</th>
+            <th>パーオン率</th>
+            <th class="p-1 border-bottom border-primary">パット数</th>
+        </tr>
+    </thead>
 
-<h1>スコア80台男性平均</h1>
-<p>スコア:{{male_score_80}}</p>
-<p>OB数:{{male_ob_80}}</p>
-<p>ペナルティ率:{{male_penalty_80}}</p>
-<p>フェアウェイキープ率:{{male_fw_80}}</p>
-<p>パーオン率:{{male_par_on_80}}</p>
-<p>パット数:{{male_putt_80}}</p>
+    <tbody>
+        <tr>
+            <th>男性平均</th>
+            <th>{{male_score_avgs}}</th>
+            <th>{{male_ob_avgs}}</th>
+            <th>{{male_penalty_avgs}}</th>
+            <th>{{male_fw_avgs}}</th>
+            <th>{{male_par_on_avgs}}</th>
+            <th>{{male_putt_avgs}}</th>
+        </tr>
+        <tr>
+            <th>スコア60台</th>
+            <th>{{male_score_60}}</th>
+            <th>{{male_ob_60}}</th>
+            <th>{{male_penalty_60}}</th>
+            <th>{{male_fw_60}}</th>
+            <th>{{male_par_on_60}}</th>
+            <th>{{male_putt_60}}</th>
+        </tr>
+        <tr>
+            <th>　　　70台</th>
+            <th>{{male_score_70}}</th>
+            <th>{{male_ob_70}}</th>
+            <th>{{male_penalty_70}}</th>
+            <th>{{male_fw_70}}</th>
+            <th>{{male_par_on_70}}</th>
+            <th>{{male_putt_70}}</th>
+        </tr>
+        <tr>
+            <th>　　　80台</th>
+            <th>{{male_score_80}}</th>
+            <th>{{male_ob_80}}</th>
+            <th>{{male_penalty_80}}</th>
+            <th>{{male_fw_80}}</th>
+            <th>{{male_par_on_80}}</th>
+            <th>{{male_putt_80}}</th>
+        </tr>
+        <tr>
+            <th>　　　90台</th>
+            <th>{{male_score_90}}</th>
+            <th>{{male_ob_90}}</th>
+            <th>{{male_penalty_90}}</th>
+            <th>{{male_fw_90}}</th>
+            <th>{{male_par_on_90}}</th>
+            <th>{{male_putt_90}}</th>
+        </tr>
+        <tr>
+            <th>　　　100台</th>
+            <th>{{male_score_100}}</th>
+            <th>{{male_ob_100}}</th>
+            <th>{{male_penalty_100}}</th>
+            <th>{{male_fw_100}}</th>
+            <th>{{male_par_on_100}}</th>
+            <th>{{male_putt_100}}</th>
+        </tr>
+        <tr>
+            <th>　　　110台</th>
+            <th>{{male_score_110}}</th>
+            <th>{{male_ob_110}}</th>
+            <th>{{male_penalty_110}}</th>
+            <th>{{male_fw_110}}</th>
+            <th>{{male_par_on_110}}</th>
+            <th>{{male_putt_110}}</th>
+        </tr>
+        <tr>
+            <th>　　　120以上</th>
+            <th>{{male_score_120}}</th>
+            <th>{{male_ob_120}}</th>
+            <th>{{male_penalty_120}}</th>
+            <th>{{male_fw_120}}</th>
+            <th>{{male_par_on_120}}</th>
+            <th>{{male_putt_120}}</th>
+        </tr>
+    </tbody>
 
-<h1>女性平均</h1>
-<p>スコア:{{female_score_avgs}}</p>
-<p>OB:{{female_ob_avgs}}回</p>
-<p>ペナルティ率:{{female_penalty_avgs}}%</p>
-<p>フェアウェイキープ率:{{female_fw_avgs}}%</p>
-<p>パーオン率:{{female_par_on_avgs}}%</p>
-<p>パット数:{{female_putt_avgs}}</p>
+    <thead class="mt-5">
+        <tr>
+            <th class="p-1 border-bottom-5 border-primary"></th>
+            <th>スコア</th>
+            <th class="p-1 border-bottom border-primary">OB数</th>
+            <th>ペナルティ率</th>
+            <th class="p-1 border-bottom border-primary">フェアウェイキープ率</th>
+            <th>パーオン率</th>
+            <th class="p-1 border-bottom border-primary">パット数</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <th>女性平均</th>
+            <th>{{female_score_avgs}}</th>
+            <th>{{female_ob_avgs}}</th>
+            <th>{{female_penalty_avgs}}</th>
+            <th>{{female_fw_avgs}}</th>
+            <th>{{female_par_on_avgs}}</th>
+            <th>{{female_putt_avgs}}</th>
+        </tr>
+        <tr>
+            <th>スコア60台</th>
+            <th>{{female_score_60}}</th>
+            <th>{{female_ob_60}}</th>
+            <th>{{female_penalty_60}}</th>
+            <th>{{female_fw_60}}</th>
+            <th>{{female_par_on_60}}</th>
+            <th>{{female_putt_60}}</th>
+        </tr>
+        <tr>
+            <th>　　　70台</th>
+            <th>{{female_score_70}}</th>
+            <th>{{female_ob_70}}</th>
+            <th>{{female_penalty_70}}</th>
+            <th>{{female_fw_70}}</th>
+            <th>{{female_par_on_70}}</th>
+            <th>{{female_putt_70}}</th>
+        </tr>
+        <tr>
+            <th>　　　80台</th>
+            <th>{{female_score_80}}</th>
+            <th>{{female_ob_80}}</th>
+            <th>{{female_penalty_80}}</th>
+            <th>{{female_fw_80}}</th>
+            <th>{{female_par_on_80}}</th>
+            <th>{{female_putt_80}}</th>
+        </tr>
+        <tr>
+            <th>　　　90台</th>
+            <th>{{female_score_90}}</th>
+            <th>{{female_ob_90}}</th>
+            <th>{{female_penalty_90}}</th>
+            <th>{{female_fw_90}}</th>
+            <th>{{female_par_on_90}}</th>
+            <th>{{female_putt_90}}</th>
+        </tr>
+        <tr>
+            <th>　　　100台</th>
+            <th>{{female_score_100}}</th>
+            <th>{{female_ob_100}}</th>
+            <th>{{female_penalty_100}}</th>
+            <th>{{female_fw_100}}</th>
+            <th>{{female_par_on_100}}</th>
+            <th>{{female_putt_100}}</th>
+        </tr>
+        <tr>
+            <th>　　　110台</th>
+            <th>{{female_score_110}}</th>
+            <th>{{female_ob_110}}</th>
+            <th>{{female_penalty_110}}</th>
+            <th>{{female_fw_110}}</th>
+            <th>{{female_par_on_110}}</th>
+            <th>{{female_putt_110}}</th>
+        </tr>
+        <tr>
+            <th>　　　120以上</th>
+            <th>{{female_score_120}}</th>
+            <th>{{female_ob_120}}</th>
+            <th>{{female_penalty_120}}</th>
+            <th>{{female_fw_120}}</th>
+            <th>{{female_par_on_120}}</th>
+            <th>{{female_putt_120}}</th>
+        </tr>
+    </tbody>
+
+</table>
+{{male_check}}
 
 {% endblock %}

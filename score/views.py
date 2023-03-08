@@ -247,20 +247,31 @@ class Average(generic.ListView):
         male_par_on_avgs = round(df_male[["player_id","par_on"]].groupby("player_id").mean()["par_on"].mean(), 1)
         male_putt_avgs = round(df_male[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
 
-        #女性平均
-        female_score_avgs = round(df_female[["player_id","total_score"]].groupby("player_id").mean()["total_score"].mean(), 1)
-        female_ob_avgs = round(df_female[["player_id","ob"]].groupby("player_id").mean()["ob"].mean(), 1)
-        female_penalty_avgs = round(df_female[["player_id","penalty"]].groupby("player_id").mean()["penalty"].mean(), 1)
-        female_fw_avgs = round(df_female[["player_id","fw"]].groupby("player_id").mean()["fw"].mean(), 1)
-        female_par_on_avgs = round(df_female[["player_id","par_on"]].groupby("player_id").mean()["par_on"].mean(), 1)
-        female_putt_avgs = round(df_female[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
-        
         #男それぞれの平均
         allmale_score_avg = df_male[["player_id","total_score","ob","penalty","fw","par_on","putt"]].groupby("player_id").mean()
+        male_60 = allmale_score_avg[allmale_score_avg["total_score"] < 70]
+        male_70 = allmale_score_avg[(allmale_score_avg["total_score"] >= 70) & (allmale_score_avg["total_score"] < 80)]
         male_80 = allmale_score_avg[(allmale_score_avg["total_score"] >= 80) & (allmale_score_avg["total_score"] < 90)]
         male_90 = allmale_score_avg[(allmale_score_avg["total_score"] >= 90) & (allmale_score_avg["total_score"] <  100)]
         male_100 = allmale_score_avg[(allmale_score_avg["total_score"] >= 100) & (allmale_score_avg["total_score"] < 110)]
-        male_110 = allmale_score_avg[allmale_score_avg["total_score"] >= 110]
+        male_110 = allmale_score_avg[(allmale_score_avg["total_score"] >= 110) & (allmale_score_avg["total_score"] < 120)]
+        male_120 = allmale_score_avg[allmale_score_avg["total_score"] >= 120]
+
+        #男性60平均
+        male_score_60 = round(male_60.mean()["total_score"], 1)
+        male_ob_60 = round(male_60.mean()["ob"], 1)
+        male_penalty_60 = round(male_60.mean()["penalty"], 1)
+        male_fw_60 = round(male_60.mean()["fw"], 1)
+        male_par_on_60 = round(male_60.mean()["par_on"], 1)
+        male_putt_60 = round(male_60.mean()["putt"], 1)
+
+        #男性70平均
+        male_score_70 = round(male_70.mean()["total_score"], 1)
+        male_ob_70 = round(male_70.mean()["ob"], 1)
+        male_penalty_70 = round(male_70.mean()["penalty"], 1)
+        male_fw_70 = round(male_70.mean()["fw"], 1)
+        male_par_on_70 = round(male_70.mean()["par_on"], 1)
+        male_putt_70 = round(male_70.mean()["putt"], 1)
 
         #男性80平均
         male_score_80 = round(male_80.mean()["total_score"], 1)
@@ -270,29 +281,252 @@ class Average(generic.ListView):
         male_par_on_80 = round(male_80.mean()["par_on"], 1)
         male_putt_80 = round(male_80.mean()["putt"], 1)
         
+        #男性90平均
+        male_score_90 = round(male_90.mean()["total_score"], 1)
+        male_ob_90 = round(male_90.mean()["ob"], 1)
+        male_penalty_90 = round(male_90.mean()["penalty"], 1)
+        male_fw_90 = round(male_90.mean()["fw"], 1)
+        male_par_on_90 = round(male_90.mean()["par_on"], 1)
+        male_putt_90 = round(male_90.mean()["putt"], 1)
+
+        #男性100平均
+        male_score_100 = round(male_100.mean()["total_score"], 1)
+        male_ob_100 = round(male_100.mean()["ob"], 1)
+        male_penalty_100 = round(male_100.mean()["penalty"], 1)
+        male_fw_100 = round(male_100.mean()["fw"], 1)
+        male_par_on_100 = round(male_100.mean()["par_on"], 1)
+        male_putt_100 = round(male_100.mean()["putt"], 1)
+
+        #男性110平均
+        male_score_110 = round(male_110.mean()["total_score"], 1)
+        male_ob_110 = round(male_110.mean()["ob"], 1)
+        male_penalty_110 = round(male_110.mean()["penalty"], 1)
+        male_fw_110 = round(male_110.mean()["fw"], 1)
+        male_par_on_110 = round(male_110.mean()["par_on"], 1)
+        male_putt_110 = round(male_110.mean()["putt"], 1)
+
+        #男性120平均
+        male_score_120 = round(male_120.mean()["total_score"], 1)
+        male_ob_120 = round(male_120.mean()["ob"], 1)
+        male_penalty_120 = round(male_120.mean()["penalty"], 1)
+        male_fw_120 = round(male_120.mean()["fw"], 1)
+        male_par_on_120 = round(male_120.mean()["par_on"], 1)
+        male_putt_120 = round(male_120.mean()["putt"], 1)
 
         #男性平均cxt
-        context["male_score_avgs"] = male_score_avgs
-        context["male_ob_avgs"] = male_ob_avgs
-        context["male_penalty_avgs"] = male_penalty_avgs
-        context["male_fw_avgs"] = male_fw_avgs
-        context["male_par_on_avgs"] = male_par_on_avgs
-        context["male_putt_avgs"] = male_putt_avgs
+        if f'{male_score_avgs}' != "nan":
+            context["male_score_avgs"] = f'{male_score_avgs}'
+            context["male_ob_avgs"] = f'{male_ob_avgs}'+"回"
+            context["male_penalty_avgs"] = f'{male_penalty_avgs}'+"回"
+            context["male_fw_avgs"] = f'{male_fw_avgs}'+"%"
+            context["male_par_on_avgs"] = f'{male_par_on_avgs}'+"%"
+            context["male_putt_avgs"] = f'{male_putt_avgs}'
+
+        #男性60平均cxtf'{}'+""
+        if f'{male_score_60}' != "nan":
+            context["male_score_60"] = male_score_60
+            context["male_ob_60"] = f'{male_ob_60}'+"回"
+            context["male_penalty_60"] = f'{male_penalty_60}'+"回"
+            context["male_fw_60"] = f'{male_fw_60}'+"%"
+            context["male_par_on_60"] = f'{male_par_on_60}'+"%"
+            context["male_putt_60"] = f'{male_putt_60}'
+
+        #男性70平均cxt
+        if f'{male_score_70}' != "nan":
+            context["male_score_70"] = male_score_70
+            context["male_ob_70"] = f'{male_ob_70}'+"回"
+            context["male_penalty_70"] = f'{male_penalty_70}'+"回"
+            context["male_fw_70"] = f'{male_fw_70}'+"%"
+            context["male_par_on_70"] = f'{male_par_on_70}'+"%"
+            context["male_putt_70"] = f'{male_putt_70}'
 
         #男性80平均cxt
-        context["male_score_80"] = male_score_80
-        context["male_ob_80"] = male_ob_80
-        context["male_penalty_80"] = male_penalty_80
-        context["male_fw_80"] = male_fw_80
-        context["male_par_on_80"] = male_par_on_80
-        context["male_putt_80"] = male_putt_80
+        if f'{male_score_80}' != "nan":
+            context["male_score_80"] = male_score_80
+            context["male_ob_80"] = f'{male_ob_80}'+"回"
+            context["male_penalty_80"] = f'{male_penalty_80}'+"回"
+            context["male_fw_80"] = f'{male_fw_80}'+"%"
+            context["male_par_on_80"] = f'{male_par_on_80}'+"%"
+            context["male_putt_80"] = f'{male_putt_80}'
+
+        #男性90平均cxt
+        if f'{male_score_90}' != "nan":
+            context["male_score_90"] = male_score_90
+            context["male_ob_90"] = f'{male_ob_90}'+"回"
+            context["male_penalty_90"] = f'{male_penalty_90}'+"回"
+            context["male_fw_90"] = f'{male_fw_90}'+"%"
+            context["male_par_on_90"] = f'{male_par_on_90}'+"%"
+            context["male_putt_90"] = f'{male_putt_90}'
+            
+        #男性100平均cxt
+        if f'{male_score_100}' != "nan":
+            context["male_score_100"] = male_score_100
+            context["male_ob_100"] = f'{male_ob_100}'+"回"
+            context["male_penalty_100"] = f'{male_penalty_100}'+"回"
+            context["male_fw_100"] = f'{male_fw_100}'+"%"
+            context["male_par_on_100"] = f'{male_par_on_100}'+"%"
+            context["male_putt_100"] = f'{male_putt_100}'
+
+        if f'{male_score_110}' != "nan":
+            context["male_score_110"] = male_score_110
+            context["male_ob_110"] = f'{male_ob_110}'+"回"
+            context["male_penalty_110"] = f'{male_penalty_110}'+"回"
+            context["male_fw_110"] = f'{male_fw_110}'+"%"
+            context["male_par_on_110"] = f'{male_par_on_110}'+"%"
+            context["male_putt_110"] = f'{male_putt_110}'
+
+        if f'{male_score_120}' != "nan":
+            context["male_score_120"] = male_score_120
+            context["male_ob_120"] = f'{male_ob_120}'+"回"
+            context["male_penalty_120"] = f'{male_penalty_120}'+"回"
+            context["male_fw_120"] = f'{male_fw_120}'+"%"
+            context["male_par_on_120"] = f'{male_par_on_120}'+"%"
+            context["male_putt_120"] = f'{male_putt_120}'
+            
+        #女性↓
+
+        #女性平均
+        female_score_avgs = round(df_female[["player_id","total_score"]].groupby("player_id").mean()["total_score"].mean(), 1)
+        female_ob_avgs = round(df_female[["player_id","ob"]].groupby("player_id").mean()["ob"].mean(), 1)
+        female_penalty_avgs = round(df_female[["player_id","penalty"]].groupby("player_id").mean()["penalty"].mean(), 1)
+        female_fw_avgs = round(df_female[["player_id","fw"]].groupby("player_id").mean()["fw"].mean(), 1)
+        female_par_on_avgs = round(df_female[["player_id","par_on"]].groupby("player_id").mean()["par_on"].mean(), 1)
+        female_putt_avgs = round(df_female[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
+
+        #女性それぞれの平均
+        allfemale_score_avg = df_female[["player_id","total_score","ob","penalty","fw","par_on","putt"]].groupby("player_id").mean()
+        female_60 = allfemale_score_avg[allfemale_score_avg["total_score"] < 70]
+        female_70 = allfemale_score_avg[(allfemale_score_avg["total_score"] >= 70) & (allfemale_score_avg["total_score"] < 80)]
+        female_80 = allfemale_score_avg[(allfemale_score_avg["total_score"] >= 80) & (allfemale_score_avg["total_score"] < 90)]
+        female_90 = allfemale_score_avg[(allfemale_score_avg["total_score"] >= 90) & (allfemale_score_avg["total_score"] <  100)]
+        female_100 = allfemale_score_avg[(allfemale_score_avg["total_score"] >= 100) & (allfemale_score_avg["total_score"] < 110)]
+        female_110 = allfemale_score_avg[(allfemale_score_avg["total_score"] >= 110) & (allfemale_score_avg["total_score"] < 120)]
+        female_120 = allfemale_score_avg[allfemale_score_avg["total_score"] >= 120]
+
+        #女性60平均
+        female_score_60 = round(female_60.mean()["total_score"], 1)
+        female_ob_60 = round(female_60.mean()["ob"], 1)
+        female_penalty_60 = round(female_60.mean()["penalty"], 1)
+        female_fw_60 = round(female_60.mean()["fw"], 1)
+        female_par_on_60 = round(female_60.mean()["par_on"], 1)
+        female_putt_60 = round(female_60.mean()["putt"], 1)
+
+        #女性70平均
+        female_score_70 = round(female_70.mean()["total_score"], 1)
+        female_ob_70 = round(female_70.mean()["ob"], 1)
+        female_penalty_70 = round(female_70.mean()["penalty"], 1)
+        female_fw_70 = round(female_70.mean()["fw"], 1)
+        female_par_on_70 = round(female_70.mean()["par_on"], 1)
+        female_putt_70 = round(female_70.mean()["putt"], 1)
+
+        #女性80平均
+        female_score_80 = round(female_80.mean()["total_score"], 1)
+        female_ob_80 = round(female_80.mean()["ob"], 1)
+        female_penalty_80 = round(female_80.mean()["penalty"], 1)
+        female_fw_80 = round(female_80.mean()["fw"], 1)
+        female_par_on_80 = round(female_80.mean()["par_on"], 1)
+        female_putt_80 = round(female_80.mean()["putt"], 1)
+        
+        #女性90平均
+        female_score_90 = round(female_90.mean()["total_score"], 1)
+        female_ob_90 = round(female_90.mean()["ob"], 1)
+        female_penalty_90 = round(female_90.mean()["penalty"], 1)
+        female_fw_90 = round(female_90.mean()["fw"], 1)
+        female_par_on_90 = round(female_90.mean()["par_on"], 1)
+        female_putt_90 = round(female_90.mean()["putt"], 1)
+
+        #女性100平均
+        female_score_100 = round(female_100.mean()["total_score"], 1)
+        female_ob_100 = round(female_100.mean()["ob"], 1)
+        female_penalty_100 = round(female_100.mean()["penalty"], 1)
+        female_fw_100 = round(female_100.mean()["fw"], 1)
+        female_par_on_100 = round(female_100.mean()["par_on"], 1)
+        female_putt_100 = round(female_100.mean()["putt"], 1)
+
+        #女性110平均
+        female_score_110 = round(female_110.mean()["total_score"], 1)
+        female_ob_110 = round(female_110.mean()["ob"], 1)
+        female_penalty_110 = round(female_110.mean()["penalty"], 1)
+        female_fw_110 = round(female_110.mean()["fw"], 1)
+        female_par_on_110 = round(female_110.mean()["par_on"], 1)
+        female_putt_110 = round(female_110.mean()["putt"], 1)
+
+        #女性120平均
+        female_score_120 = round(female_120.mean()["total_score"], 1)
+        female_ob_120 = round(female_120.mean()["ob"], 1)
+        female_penalty_120 = round(female_120.mean()["penalty"], 1)
+        female_fw_120 = round(female_120.mean()["fw"], 1)
+        female_par_on_120 = round(female_120.mean()["par_on"], 1)
+        female_putt_120 = round(female_120.mean()["putt"], 1)
 
         #女性平均cxt
-        context["female_score_avgs"] = female_score_avgs
-        context["female_ob_avgs"] = female_ob_avgs
-        context["female_penalty_avgs"] = female_penalty_avgs
-        context["female_fw_avgs"] = female_fw_avgs
-        context["female_par_on_avgs"] = female_par_on_avgs
-        context["female_putt_avgs"] = female_putt_avgs
+        if f'{female_score_avgs}' != "nan":
+            context["female_score_avgs"] = f'{female_score_avgs}'
+            context["female_ob_avgs"] = f'{female_ob_avgs}'+"回"
+            context["female_penalty_avgs"] = f'{female_penalty_avgs}'+"回"
+            context["female_fw_avgs"] = f'{female_fw_avgs}'+"%"
+            context["female_par_on_avgs"] = f'{female_par_on_avgs}'+"%"
+            context["female_putt_avgs"] = f'{female_putt_avgs}'
+
+        #女性60平均cxtf'{}'+""
+        if f'{female_score_60}' != "nan":
+            context["female_score_60"] = female_score_60
+            context["female_ob_60"] = f'{female_ob_60}'+"回"
+            context["female_penalty_60"] = f'{female_penalty_60}'+"回"
+            context["female_fw_60"] = f'{female_fw_60}'+"%"
+            context["female_par_on_60"] = f'{female_par_on_60}'+"%"
+            context["female_putt_60"] = f'{female_putt_60}'
+
+        #女性70平均cxt
+        if f'{female_score_70}' != "nan":
+            context["female_score_70"] = female_score_70
+            context["female_ob_70"] = f'{female_ob_70}'+"回"
+            context["female_penalty_70"] = f'{female_penalty_70}'+"回"
+            context["female_fw_70"] = f'{female_fw_70}'+"%"
+            context["female_par_on_70"] = f'{female_par_on_70}'+"%"
+            context["female_putt_70"] = f'{female_putt_70}'
+
+        #女性80平均cxt
+        if f'{female_score_80}' != "nan":
+            context["female_score_80"] = female_score_80
+            context["female_ob_80"] = f'{female_ob_80}'+"回"
+            context["female_penalty_80"] = f'{female_penalty_80}'+"回"
+            context["female_fw_80"] = f'{female_fw_80}'+"%"
+            context["female_par_on_80"] = f'{female_par_on_80}'+"%"
+            context["female_putt_80"] = f'{female_putt_80}'
+
+        #女性90平均cxt
+        if f'{female_score_90}' != "nan":
+            context["female_score_90"] = female_score_90
+            context["female_ob_90"] = f'{female_ob_90}'+"回"
+            context["female_penalty_90"] = f'{female_penalty_90}'+"回"
+            context["female_fw_90"] = f'{female_fw_90}'+"%"
+            context["female_par_on_90"] = f'{female_par_on_90}'+"%"
+            context["female_putt_90"] = f'{female_putt_90}'
+            
+        #女性100平均cxt
+        if f'{female_score_100}' != "nan":
+            context["female_score_100"] = female_score_100
+            context["female_ob_100"] = f'{female_ob_100}'+"回"
+            context["female_penalty_100"] = f'{female_penalty_100}'+"回"
+            context["female_fw_100"] = f'{female_fw_100}'+"%"
+            context["female_par_on_100"] = f'{female_par_on_100}'+"%"
+            context["female_putt_100"] = f'{female_putt_100}'
+
+        if f'{female_score_110}' != "nan":
+            context["female_score_110"] = female_score_110
+            context["female_ob_110"] = f'{female_ob_110}'+"回"
+            context["female_penalty_110"] = f'{female_penalty_110}'+"回"
+            context["female_fw_110"] = f'{female_fw_110}'+"%"
+            context["female_par_on_110"] = f'{female_par_on_110}'+"%"
+            context["female_putt_110"] = f'{female_putt_110}'
+
+        if f'{female_score_120}' != "nan":
+            context["female_score_120"] = female_score_120
+            context["female_ob_120"] = f'{female_ob_120}'+"回"
+            context["female_penalty_120"] = f'{female_penalty_120}'+"回"
+            context["female_fw_120"] = f'{female_fw_120}'+"%"
+            context["female_par_on_120"] = f'{female_par_on_120}'+"%"
+            context["female_putt_120"] = f'{female_putt_120}'
 
         return context
