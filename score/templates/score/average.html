@@ -1,3 +1,7 @@
+{% extends "score/base.html" %}
+{% load django_bootstrap5 %}
+{% block content %}
+
 <h1>男性平均</h1>
 <p>スコア:{{male_score_avgs}}</p>
 <p>OB:{{male_ob_avgs}}回</p>
@@ -6,6 +10,13 @@
 <p>パーオン率:{{male_par_on_avgs}}%</p>
 <p>パット数:{{male_putt_avgs}}</p>
 
+<h1>スコア80台男性平均</h1>
+<p>スコア:{{male_score_80}}</p>
+<p>OB数:{{male_ob_80}}</p>
+<p>ペナルティ率:{{male_penalty_80}}</p>
+<p>フェアウェイキープ率:{{male_fw_80}}</p>
+<p>パーオン率:{{male_par_on_80}}</p>
+<p>パット数:{{male_putt_80}}</p>
 
 <h1>女性平均</h1>
 <p>スコア:{{female_score_avgs}}</p>
@@ -14,3 +25,5 @@
 <p>フェアウェイキープ率:{{female_fw_avgs}}%</p>
 <p>パーオン率:{{female_par_on_avgs}}%</p>
 <p>パット数:{{female_putt_avgs}}</p>
+
+{% endblock %}

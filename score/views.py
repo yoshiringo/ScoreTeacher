@@ -13,8 +13,6 @@ from django.core.paginator import Paginator
 from .forms import PersonCreateForm
 from django.db.models import Avg
 
-
-
 # Create your views here.
 
 class PersonList(generic.ListView):
@@ -32,7 +30,7 @@ class PersonList(generic.ListView):
             player_add = "プレイヤーを追加してください"
             context["player_add"] = player_add 
 
-        paginator = Paginator(personlist, 2)
+        paginator = Paginator(personlist, 20)
         p = self.request.GET.get('p')
         persons = paginator.get_page(p)
 
@@ -51,7 +49,7 @@ class StatCreate(generic.CreateView):
         pk = self.kwargs.get("pk")
         person = get_object_or_404(Person, pk=pk)
         context["person"] = person
-        stats = Stat.objects.filter(player=pk)
+        stats = Stat.objects.filter(player=pk).order_by("date")
         context['breadcrumbs_list'] = [{'name': 'Stats',
                                          'url': ''}]
         stats_str = f'{stats}'
@@ -240,6 +238,8 @@ class Average(generic.ListView):
 
         df_male = pd.DataFrame(Stat.objects.filter(player__sex="男性").values())
         df_female = pd.DataFrame(Stat.objects.filter(player__sex="女性").values())
+
+        #男性平均
         male_score_avgs = round(df_male[["player_id","total_score"]].groupby("player_id").mean()["total_score"].mean(), 1)
         male_ob_avgs = round(df_male[["player_id","ob"]].groupby("player_id").mean()["ob"].mean(), 1)
         male_penalty_avgs = round(df_male[["player_id","penalty"]].groupby("player_id").mean()["penalty"].mean(), 1)
@@ -247,13 +247,31 @@ class Average(generic.ListView):
         male_par_on_avgs = round(df_male[["player_id","par_on"]].groupby("player_id").mean()["par_on"].mean(), 1)
         male_putt_avgs = round(df_male[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
 
+        #女性平均
         female_score_avgs = round(df_female[["player_id","total_score"]].groupby("player_id").mean()["total_score"].mean(), 1)
         female_ob_avgs = round(df_female[["player_id","ob"]].groupby("player_id").mean()["ob"].mean(), 1)
         female_penalty_avgs = round(df_female[["player_id","penalty"]].groupby("player_id").mean()["penalty"].mean(), 1)
         female_fw_avgs = round(df_female[["player_id","fw"]].groupby("player_id").mean()["fw"].mean(), 1)
         female_par_on_avgs = round(df_female[["player_id","par_on"]].groupby("player_id").mean()["par_on"].mean(), 1)
         female_putt_avgs = round(df_female[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
+        
+        #男それぞれの平均
+        allmale_score_avg = df_male[["player_id","total_score","ob","penalty","fw","par_on","putt"]].groupby("player_id").mean()
+        male_80 = allmale_score_avg[(allmale_score_avg["total_score"] >= 80) & (allmale_score_avg["total_score"] < 90)]
+        male_90 = allmale_score_avg[(allmale_score_avg["total_score"] >= 90) & (allmale_score_avg["total_score"] <  100)]
+        male_100 = allmale_score_avg[(allmale_score_avg["total_score"] >= 100) & (allmale_score_avg["total_score"] < 110)]
+        male_110 = allmale_score_avg[allmale_score_avg["total_score"] >= 110]
 
+        #男性80平均
+        male_score_80 = round(male_80.mean()["total_score"], 1)
+        male_ob_80 = round(male_80.mean()["ob"], 1)
+        male_penalty_80 = round(male_80.mean()["penalty"], 1)
+        male_fw_80 = round(male_80.mean()["fw"], 1)
+        male_par_on_80 = round(male_80.mean()["par_on"], 1)
+        male_putt_80 = round(male_80.mean()["putt"], 1)
+        
+
+        #男性平均cxt
         context["male_score_avgs"] = male_score_avgs
         context["male_ob_avgs"] = male_ob_avgs
         context["male_penalty_avgs"] = male_penalty_avgs
@@ -261,6 +279,15 @@ class Average(generic.ListView):
         context["male_par_on_avgs"] = male_par_on_avgs
         context["male_putt_avgs"] = male_putt_avgs
 
+        #男性80平均cxt
+        context["male_score_80"] = male_score_80
+        context["male_ob_80"] = male_ob_80
+        context["male_penalty_80"] = male_penalty_80
+        context["male_fw_80"] = male_fw_80
+        context["male_par_on_80"] = male_par_on_80
+        context["male_putt_80"] = male_putt_80
+
+        #女性平均cxt
         context["female_score_avgs"] = female_score_avgs
         context["female_ob_avgs"] = female_ob_avgs
         context["female_penalty_avgs"] = female_penalty_avgs
