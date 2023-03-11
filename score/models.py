@@ -21,6 +21,7 @@ class Person(models.Model):
     login_user = models.IntegerField(null=True)
     sex = models.CharField(verbose_name="性別", choices=settings.SEX, max_length=2)
     age = models.IntegerField(null=True)
+    player_number = models.IntegerField(null=True)
     
 class Stat(models.Model):
     player = models.ForeignKey(to=Person, verbose_name='プレイヤー', on_delete=models.CASCADE)
@@ -31,6 +32,7 @@ class Stat(models.Model):
     fw = models.PositiveSmallIntegerField(verbose_name='FWキープ率', blank=False, null=False)
     par_on = models.PositiveSmallIntegerField(verbose_name='パーオン率', blank=False, null=False)
     putt = models.PositiveSmallIntegerField(verbose_name='パット数', blank=False, null=False)
+    stat_number = models.IntegerField(null=True)
 
     def __str__(self):
         return f'#{self.pk} {self.player}'

@@ -5,7 +5,7 @@ from .models import Stat, Person
 class StatCreateForm(forms.ModelForm):
     class Meta:
         model = Stat
-        exclude = ('player',)
+        exclude = ('player','stat_number')
         widgets = {
             'date': forms.TextInput(attrs={'autocomplete': 'off',
                                                  'placeholder': 'ラウンド日',

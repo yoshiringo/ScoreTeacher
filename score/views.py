@@ -12,13 +12,15 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from .forms import PersonCreateForm
 from django.db.models import Avg
+from django.shortcuts import render
+import csv
+from io import TextIOWrapper, StringIO
 
 # Create your views here.
 
 class PersonList(generic.ListView):
     model = Person
     template_name = "score/index.html"
-    paginate_by = 3
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -30,12 +32,16 @@ class PersonList(generic.ListView):
             player_add = "プレイヤーを追加してください"
             context["player_add"] = player_add 
 
-        paginator = Paginator(personlist, 20)
+        paginator = Paginator(personlist, 30)
         p = self.request.GET.get('p')
         persons = paginator.get_page(p)
 
         context["persons"] = persons
         context["person_user"] = person_user
+
+        saki = "中尾早紀"
+        check = Person.objects.filter(name=saki)
+        context["check"] = check
 
         return context
 
@@ -108,6 +114,8 @@ class StatCreate(generic.CreateView):
             putt_avg = float(putt_avg.replace("{'putt__avg': ", "").replace("}", ""))
             putt_avg = round(putt_avg, 1)
             context["putt_avg"] = putt_avg
+
+        
         
         return context
 
@@ -529,4 +537,44 @@ class Average(generic.ListView):
             context["female_par_on_120"] = f'{female_par_on_120}'+"%"
             context["female_putt_120"] = f'{female_putt_120}'
 
+
+
         return context
+    
+def upload(request):
+    if 'csv' in request.FILES:
+        form_data = TextIOWrapper(request.FILES['csv'].file, encoding='utf-8')
+        csv_file = csv.reader(form_data)
+        for line in csv_file:
+            person, created = Person.objects.get_or_create(name=line[0])
+            person.login_user = request.user.id
+            person.player_number = line[1]
+            person.age = line[2]
+            person.sex = line[3]
+            person.save()           
+
+        return render(request, 'score/upload.html')
+
+    else:
+        return render(request, 'score/upload.html')
+    
+def uploadsecond(request):
+    if 'csv' in request.FILES:
+        form_data = TextIOWrapper(request.FILES['csv'].file, encoding='utf-8')
+        csv_file = csv.reader(form_data)
+        stat = Stat()
+        for line in csv_file:
+            stat.player = Person.objects.filter(player_number=line[1])
+            stat.date = line[4]
+            stat.total_score = line[5]
+            stat.ob = line[6]
+            stat.penalty = line[7]
+            stat.fw = line[8]
+            stat.par_on = line[9]
+            stat.putt = line[10]
+            stat.save()
+
+        return render(request, 'score/uploadsecond.html')
+
+    else:
+        return render(request, 'score/uploadsecond.html')
