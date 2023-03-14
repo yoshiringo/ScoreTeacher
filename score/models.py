@@ -25,7 +25,7 @@ class Person(models.Model):
     
 class Stat(models.Model):
     player = models.ForeignKey(to=Person, verbose_name='プレイヤー', on_delete=models.CASCADE)
-    date = models.DateField(verbose_name='日付')
+    date = models.DateField(verbose_name='日付', blank=False, null=False)
     total_score = models.PositiveSmallIntegerField(verbose_name='スコア', blank=False, null=False)
     ob = models.PositiveSmallIntegerField(verbose_name='OB', blank=False, null=False)
     penalty = models.PositiveSmallIntegerField(verbose_name='ペナルティ率', blank=False, null=False)

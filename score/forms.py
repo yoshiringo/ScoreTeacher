@@ -39,18 +39,6 @@ class PersonCreateForm(forms.ModelForm):
             'name' : '名前',
             'age' : '年齢'
         }
-        """
-        exclude = ('login_user',)
-        
-        widgets = {
-            'name': forms.TextInput(attrs={'autocomplete': 'off',
-                                                 'placeholder': '名前',
-                                                 'class': 'form-control'}),    
-            'age' : forms.TextInput(attrs={'autocomplete': 'off',
-                                                 'placeholder': '年齢',
-                                                 'class': 'form-control'}),                                                                                                                                            
-        }  
-        """
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)

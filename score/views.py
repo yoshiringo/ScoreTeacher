@@ -39,10 +39,6 @@ class PersonList(generic.ListView):
         context["persons"] = persons
         context["person_user"] = person_user
 
-        saki = "中尾早紀"
-        check = Person.objects.filter(name=saki)
-        context["check"] = check
-
         return context
 
 class StatCreate(generic.CreateView):
@@ -329,7 +325,7 @@ class Average(generic.ListView):
             context["male_fw_avgs"] = f'{male_fw_avgs}'+"%"
             context["male_par_on_avgs"] = f'{male_par_on_avgs}'+"%"
             context["male_putt_avgs"] = f'{male_putt_avgs}'
-
+        
         #男性60平均cxtf'{}'+""
         if f'{male_score_60}' != "nan":
             context["male_score_60"] = male_score_60
@@ -546,35 +542,32 @@ def upload(request):
         form_data = TextIOWrapper(request.FILES['csv'].file, encoding='utf-8')
         csv_file = csv.reader(form_data)
         for line in csv_file:
-            person, created = Person.objects.get_or_create(name=line[0])
+            person, created = Person.objects.get_or_create(player_number=line[1])
             person.login_user = request.user.id
-            person.player_number = line[1]
+            person.name =line[0]
             person.age = line[2]
             person.sex = line[3]
-            person.save()           
+            person.save()
+
+            stat_number_check = Stat.objects.values("stat_number").all()
+            if line[11] not in f'{stat_number_check}':
+            
+                Stat.objects.create(
+                    player = Person.objects.get(player_number=line[1]),
+                    stat_number = line[11],
+                    date = line[4],
+                    total_score = line[5],
+                    ob = line[6],
+                    penalty = line[7],
+                    fw = line[8],
+                    par_on = line[9],
+                    putt = line[10],
+
+                )
+            
 
         return render(request, 'score/upload.html')
 
     else:
         return render(request, 'score/upload.html')
     
-def uploadsecond(request):
-    if 'csv' in request.FILES:
-        form_data = TextIOWrapper(request.FILES['csv'].file, encoding='utf-8')
-        csv_file = csv.reader(form_data)
-        stat = Stat()
-        for line in csv_file:
-            stat.player = Person.objects.filter(player_number=line[1])
-            stat.date = line[4]
-            stat.total_score = line[5]
-            stat.ob = line[6]
-            stat.penalty = line[7]
-            stat.fw = line[8]
-            stat.par_on = line[9]
-            stat.putt = line[10]
-            stat.save()
-
-        return render(request, 'score/uploadsecond.html')
-
-    else:
-        return render(request, 'score/uploadsecond.html')
