@@ -32,7 +32,7 @@ class PersonList(generic.ListView):
             player_add = "プレイヤーを追加してください"
             context["player_add"] = player_add 
 
-        paginator = Paginator(personlist, 30)
+        paginator = Paginator(personlist, 10)
         p = self.request.GET.get('p')
         persons = paginator.get_page(p)
 
@@ -171,7 +171,7 @@ class StatAnalyze(generic.DetailView):
 
         df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
         
-        df.columns = ["id", "player_id", "date", "スコア", "OB数", "ペナルティ数", "FWキープ率", "パーオン率", "パット数"]
+        df.columns = ["id", "player_id", "date", "スコア", "OB数", "ペナルティ数", "FWキープ率", "パーオン率", "パット数", "stat_number"]
         
         df_score = df.sort_values("スコア")
         data_count = df["スコア"].count()

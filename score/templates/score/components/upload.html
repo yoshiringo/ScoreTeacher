@@ -1,6 +1,5 @@
-{% extends "score/base.html" %}
+
 {% load static %}
-{% block title %}スタッツアップロード{% endblock %}
 {% block extrahead %}
 <script>
 $(function(){
@@ -10,11 +9,11 @@ $(function(){
 {% endblock %}
 
 {% block content %}
-<h3>アップロードするよ</h3>
+<h3>CSVファイルからアップロード</h3>
 <form action="{% url 'score:upload' %}" method="post" enctype="multipart/form-data">
   {% csrf_token %}
   <input type="file" class="dropify" data-default-file="ファイルを選択してください" name="csv">
-  <button type="submit" class="btn" name="button">アップロード</button>
+  <button type="submit" class="btn btn-primary fw-bold">アップロード</button>
 </form>
 
 {% endblock content %}
