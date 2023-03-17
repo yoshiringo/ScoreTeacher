@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from .forms import PersonCreateForm
 from django.db.models import Avg
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 import csv
 from io import TextIOWrapper, StringIO
 
@@ -171,7 +171,7 @@ class StatAnalyze(generic.DetailView):
 
         df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
         
-        df.columns = ["id", "player_id", "date", "スコア", "OB数", "ペナルティ数", "FWキープ率", "パーオン率", "パット数", "stat_number"]
+        df.columns = ["id", "player_id", "date", "スコア", "OB数", "ペナルティ数", "FWキープ率", "パーオン率", "パット数"]
         
         df_score = df.sort_values("スコア")
         data_count = df["スコア"].count()
@@ -568,10 +568,10 @@ def upload(request):
                     putt = line[10],
 
                 )
-            
 
-        return render(request, 'score/upload.html')
+        
+        return redirect('score:person_list')
+
 
     else:
         return render(request, 'score/upload.html')
-    
