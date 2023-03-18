@@ -3,18 +3,17 @@ from .models import Person, Stat
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from .forms import StatCreateForm, PersonCreateForm
+from .forms import StatCreateForm, PersonCreateForm, CSVUploadForm
 import pandas as pd
-import numpy as np
-import random
 from . import plugin_plotly
-from django.http import HttpResponse
 from django.core.paginator import Paginator
 from .forms import PersonCreateForm
 from django.db.models import Avg
 from django.shortcuts import render,redirect
 import csv
-from io import TextIOWrapper, StringIO
+import io
+from django.contrib import messages
+
 
 # Create your views here.
 
@@ -541,6 +540,7 @@ class Average(generic.ListView):
 
         return context
     
+"""
 def upload(request):
     if 'csv' in request.FILES:
         form_data = TextIOWrapper(request.FILES['csv'].file, encoding='utf-8')
@@ -575,3 +575,89 @@ def upload(request):
 
     else:
         return render(request, 'score/upload.html')
+
+
+class PostImport(generic.FormView):
+    template_name = 'score/upload.html'
+    success_url = reverse_lazy('score:person_list')
+    form_class = CSVUploadForm
+
+    def form_valid(self, form):
+        # csv.readerに渡すため、TextIOWrapperでテキストモードなファイルに変換
+        
+        form_data = io.TextIOWrapper(form.cleaned_data['file'], encoding='utf-8')
+        csv_file = csv.reader(form_data)
+        # 1行ずつ取り出し、作成していく
+        if form_data.name.endswith('.csv'):
+        
+            for line in csv_file:
+                person, created = Person.objects.get_or_create(player_number=line[1])
+                person.login_user = self.request.user.id
+                person.name =line[0]
+                person.age = line[2]
+                person.sex = line[3]
+                person.save()
+
+                stat_number_check = Stat.objects.values("stat_number").all()
+                if line[11] not in f'{stat_number_check}':
+                
+                    Stat.objects.create(
+                        player = Person.objects.get(player_number=line[1]),
+                        stat_number = line[11],
+                        date = line[4],
+                        total_score = line[5],
+                        ob = line[6],
+                        penalty = line[7],
+                        fw = line[8],
+                        par_on = line[9],
+                        putt = line[10],
+
+                    )
+            return super().form_valid(form)
+            
+        else:
+            messages.add_message(self.request, messages.ERROR, "csvファイルを選択してください")
+            return redirect('score:upload')
+        
+"""
+
+class PostImport(generic.FormView):
+    template_name = 'score/upload.html'
+    success_url = reverse_lazy('score:person_list')
+    form_class = CSVUploadForm
+
+    def form_valid(self, form):
+        # csv.readerに渡すため、TextIOWrapperでテキストモードなファイルに変換
+        form_data = io.TextIOWrapper(form.cleaned_data['file'], encoding='utf-8')
+        csv_file = csv.reader(form_data)
+        # 1行ずつ取り出し、作成していく
+        if form_data.name.endswith('.csv'):
+        
+            for line in csv_file:
+                person, created = Person.objects.get_or_create(player_number=line[1])
+                person.login_user = self.request.user.id
+                person.name =line[0]
+                person.age = line[2]
+                person.sex = line[3]
+                person.save()
+
+                stat_number_check = Stat.objects.values("stat_number").all()
+                if line[11] not in f'{stat_number_check}':
+                
+                    Stat.objects.create(
+                        player = Person.objects.get(player_number=line[1]),
+                        stat_number = line[11],
+                        date = line[4],
+                        total_score = line[5],
+                        ob = line[6],
+                        penalty = line[7],
+                        fw = line[8],
+                        par_on = line[9],
+                        putt = line[10],
+
+                    )
+            return super().form_valid(form)
+            
+        else:
+            messages.add_message(self.request, messages.ERROR, "csvファイルを選択してください")
+            return redirect('score:upload')

@@ -1,20 +1,14 @@
-{% extends "score/base.html" %}
-{% load static %}
-{% block title %}スタッツアップロード{% endblock %}
-{% block extrahead %}
-<script>
-$(function(){
-  $('.dropify').dropify();
-})
-</script>
-{% endblock %}
+{% extends 'score/base.html' %}
 
 {% block content %}
-<h3>アップロードするよ</h3>
-<form action="{% url 'score:upload' %}" method="post" enctype="multipart/form-data">
+{% for message in messages %}
+<div {% if message.tags %}class="{{ message.tags }} w-25"{% endif %}>
+    {{ message }}
+</div>
+{% endfor %}
+<form action="" method="POST" enctype="multipart/form-data">
+  {{ form.as_p }}
   {% csrf_token %}
-  <input type="file" class="dropify" data-default-file="ファイルを選択してください" name="csv">
-  <button type="submit" class="btn" name="button">アップロード</button>
+  <button type="submit">送信</button>
 </form>
-
-{% endblock content %}
+{% endblock %}

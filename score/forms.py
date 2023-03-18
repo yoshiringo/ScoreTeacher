@@ -1,6 +1,8 @@
 
 from django import forms
 from .models import Stat, Person
+import csv
+import io
 
 class StatCreateForm(forms.ModelForm):
     class Meta:
@@ -45,3 +47,6 @@ class PersonCreateForm(forms.ModelForm):
             for field in self.fields.values():
                 field.widget.attrs["class"] = "form-control"
                 field.widget.attrs["autocomplete"] = "off"
+
+class CSVUploadForm(forms.Form):
+    file = forms.FileField(label='CSVファイル')
