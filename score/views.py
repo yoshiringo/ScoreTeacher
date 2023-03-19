@@ -170,7 +170,7 @@ class StatAnalyze(generic.DetailView):
 
         df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
         
-        df.columns = ["id", "player_id", "date", "スコア", "OB数", "ペナルティ数", "FWキープ率", "パーオン率", "パット数"]
+        df.columns = ["id", "player_id", "date", "スコア", "OB数", "ペナルティ数", "FWキープ率", "パーオン率", "パット数", "stat_number"]
         
         df_score = df.sort_values("スコア")
         data_count = df["スコア"].count()
@@ -630,34 +630,43 @@ class PostImport(generic.FormView):
         # csv.readerに渡すため、TextIOWrapperでテキストモードなファイルに変換
         form_data = io.TextIOWrapper(form.cleaned_data['file'], encoding='utf-8')
         csv_file = csv.reader(form_data)
+        stat_before_import = Stat.objects.all()
         # 1行ずつ取り出し、作成していく
         if form_data.name.endswith('.csv'):
         
             for line in csv_file:
-                person, created = Person.objects.get_or_create(player_number=line[1])
-                person.login_user = self.request.user.id
-                person.name =line[0]
-                person.age = line[2]
-                person.sex = line[3]
-                person.save()
+                try:
+                    person, created = Person.objects.get_or_create(player_number=line[1])
+                    person.login_user = self.request.user.id
+                    person.name =line[0]
+                    person.age = line[2]
+                    person.sex = line[3]
+                    person.save()
 
-                stat_number_check = Stat.objects.values("stat_number").all()
-                if line[11] not in f'{stat_number_check}':
-                
-                    Stat.objects.create(
-                        player = Person.objects.get(player_number=line[1]),
-                        stat_number = line[11],
-                        date = line[4],
-                        total_score = line[5],
-                        ob = line[6],
-                        penalty = line[7],
-                        fw = line[8],
-                        par_on = line[9],
-                        putt = line[10],
+                    stat_number_check = Stat.objects.values("stat_number").all()
+                    if line[11] not in f'{stat_number_check}':
+                    
+                        Stat.objects.create(
+                            player = Person.objects.get(player_number=line[1]),
+                            stat_number = line[11],
+                            date = line[4],
+                            total_score = line[5],
+                            ob = line[6],
+                            penalty = line[7],
+                            fw = line[8],
+                            par_on = line[9],
+                            putt = line[10],
 
-                    )
+                        )
+
+                except:
+                    messages.add_message(self.request, messages.ERROR, "内容が正しいか等確認してください")
+                    return redirect('score:upload')
+        
+
             return super().form_valid(form)
             
         else:
             messages.add_message(self.request, messages.ERROR, "csvファイルを選択してください")
             return redirect('score:upload')
+        
