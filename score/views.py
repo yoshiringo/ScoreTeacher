@@ -9,10 +9,13 @@ from . import plugin_plotly
 from django.core.paginator import Paginator
 from .forms import PersonCreateForm
 from django.db.models import Avg
-from django.shortcuts import render,redirect
+from django.shortcuts import redirect
 import csv
 import io
 from django.contrib import messages
+from sklearn.linear_model import LinearRegression
+import numpy as np
+import statsmodels.api as sm
 
 
 # Create your views here.
@@ -154,6 +157,50 @@ class PersonCreate(generic.CreateView):
 
         return reverse_lazy('score:person_list')
     
+
+
+
+class StatAnalyze(generic.DetailView):
+    model = Person
+    template_name = "score/stat_analyze.html"
+    context_object_name = "person_stat"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pk = self.kwargs.get("pk")
+
+        context['breadcrumbs_list'] = [
+        {'name': 'Stats', 'url': f'/score/detail/{pk}/'},
+        {'name': '分析結果','url': ''}
+        ]
+
+        df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
+        df.columns = ["id", "player_id", "date", "total_score", "ob", "penalty", "fw", "par_on", "putt", "stat_number"]
+        x = df.drop(['id','player_id','date','total_score','stat_number'], axis=1)
+        y = df['total_score']
+
+        reg = LinearRegression()
+        reg.fit(x,y)
+        coef_ = reg.coef_
+        n = x.shape[0]
+        p = x.shape[1]
+
+        y_hat = reg.predict(x)
+        sse = np.sum((y - y_hat) **2, axis=0)
+        sse = sse / (n - p -1)
+        s = np.linalg.pinv(np.dot(x.T, x))
+        std_err = np.sqrt(np.diagonal(sse * s))
+
+        t_values = coef_ / std_err
+
+        context["t_values"] = t_values
+        context["coef_"] = coef_
+        context["std_err"] = std_err
+
+        return context
+     
+        
+    """
 class StatAnalyze(generic.DetailView):
     model = Person
     template_name = "score/stat_analyze.html"
@@ -207,9 +254,7 @@ class StatAnalyze(generic.DetailView):
         result_a = f'{result}'
         result_b = result_a.translate(str.maketrans({"(": "", ")": "", "'": ""}))
         
-        context["result"] = result
-        context["practice"] = practice
-        context["number"] = number
+
         context["result_b"] = result_b
 
         pie = [pie for pie in number]
@@ -218,6 +263,8 @@ class StatAnalyze(generic.DetailView):
         context["chart"] = chart
 
         return context
+
+        """
 
 class StatDelete(generic.DeleteView):
     model = Stat
@@ -643,8 +690,10 @@ class PostImport(generic.FormView):
                     person.sex = line[3]
                     person.save()
 
-                    stat_number_check = Stat.objects.values("stat_number").all()
-                    if line[11] not in f'{stat_number_check}':
+                    stat_number_check =list(Stat.objects.values("stat_number").all())
+                    stat_number_check = f'{stat_number_check}'
+                    stat_number_check = stat_number_check.replace("}", "")
+                    if f': {line[11]},' not in f'{stat_number_check}' and f': {line[11]}]' not in f'{stat_number_check}':
                     
                         Stat.objects.create(
                             player = Person.objects.get(player_number=line[1]),

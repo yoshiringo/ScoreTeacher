@@ -12,3 +12,5 @@ django[argon2]
 django-bootstrap5
 bulma
 django-widget-tweaks
+scikit-learn
+statsmodels
