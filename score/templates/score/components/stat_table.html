@@ -14,6 +14,7 @@
             <th class="p-1 border-bottom border-primary">FWキープ</th>
             <th>パーオン</th>
             <th class="p-1 border-bottom border-primary">パット</th>
+            <th class="p-1 border-bottom border-primary">バンカー</th>
 
             <th scope="col"></th>
         </tr>
@@ -30,6 +31,7 @@
             <th>{{ stat.fw }}%</th>
             <th>{{ stat.par_on }}%</th>
             <th>{{ stat.putt }}</th>
+            <th>{{ stat.bunker }}</th>
 
             <th>
                 <button type="button" class="btn btn-rounded btn-sm btn-danger delete-modal-button"
@@ -57,11 +59,12 @@
         <tr class="fs-4">
             <th class="fw-bold">平均</th>
             <th>{{ score_avg }}</th>
-            <th>{{ ob_avg }}</th>
-            <th>{{ penalty_avg }}</th>
+            <th>{{ ob_avg }}回</th>
+            <th>{{ penalty_avg }}回</th>
             <th>{{ fw_avg }}%</th>
             <th>{{ par_on_avg }}%</th>
             <th>{{ putt_avg }}</th>
+            <th>{{ bunker_avg }}回</th>
         </tr>
         
         <tr>

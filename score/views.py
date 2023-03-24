@@ -15,8 +15,7 @@ import io
 from django.contrib import messages
 from sklearn.linear_model import LinearRegression
 import numpy as np
-import statsmodels.api as sm
-
+from sklearn.preprocessing import StandardScaler
 
 # Create your views here.
 
@@ -60,7 +59,7 @@ class StatCreate(generic.CreateView):
         check = any(map(str.isdigit, stats_str))
         context["check"] = check
 
-        paginator = Paginator(stats, 5)
+        paginator = Paginator(stats, 30)
         p = self.request.GET.get('p')
         stat_p = paginator.get_page(p)
         context["stat_p"] = stat_p
@@ -113,7 +112,13 @@ class StatCreate(generic.CreateView):
             putt_avg = round(putt_avg, 1)
             context["putt_avg"] = putt_avg
 
-        
+        bunker_avg = Stat.objects.filter(player=pk).aggregate(Avg("bunker"))
+        bunker_avg = f'{bunker_avg}'
+        score_avg_check = any(map(str.isdigit, bunker_avg))
+        if  score_avg_check == True:
+            bunker_avg = float(bunker_avg.replace("{'bunker__avg': ", "").replace("}", ""))
+            bunker_avg = round(bunker_avg, 1)
+            context["bunker_avg"] = bunker_avg
         
         return context
 
@@ -156,9 +161,6 @@ class PersonCreate(generic.CreateView):
         pk = self.request.user.id
 
         return reverse_lazy('score:person_list')
-    
-
-
 
 class StatAnalyze(generic.DetailView):
     model = Person
@@ -175,27 +177,33 @@ class StatAnalyze(generic.DetailView):
         ]
 
         df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
-        df.columns = ["id", "player_id", "date", "total_score", "ob", "penalty", "fw", "par_on", "putt", "stat_number"]
-        x = df.drop(['id','player_id','date','total_score','stat_number'], axis=1)
-        y = df['total_score']
+        df.columns = ["id", "player_id", "date", "total_score", "ob", "penalty", "fw", "par_on", "putt", "bunker", "stat_number"]
+        #全stat
+        z = df.drop(['id','player_id','date','stat_number'], axis=1)
+
+        #statを標準化したもの
+        df_std = z.apply(lambda x: (x-x.mean())/x.std(), axis=0)
+        #statのtotal_score以外
+        x = df_std.drop(['total_score'], axis=1)
+        #total_score
+        y = df_std['total_score']
 
         reg = LinearRegression()
-        reg.fit(x,y)
-        coef_ = reg.coef_
+        results = reg.fit(x,y)
+        coef = reg.coef_.round(4)
         n = x.shape[0]
         p = x.shape[1]
 
         y_hat = reg.predict(x)
         sse = np.sum((y - y_hat) **2, axis=0)
-        sse = sse / (n - p -1)
-        s = np.linalg.pinv(np.dot(x.T, x))
-        std_err = np.sqrt(np.diagonal(sse * s))
+        sse = sse / (n - p - 1)
+        s = np.linalg.inv(np.dot(x.T, x))
+        std_err = np.sqrt(np.diagonal(sse * s)).round(4)
 
-        t_values = coef_ / std_err
+        t_values = (coef / std_err).round(4)
 
         context["t_values"] = t_values
-        context["coef_"] = coef_
-        context["std_err"] = std_err
+        context["z"] = z
 
         return context
      
@@ -298,9 +306,10 @@ class Average(generic.ListView):
             male_fw_avgs = round(df_male[["player_id","fw"]].groupby("player_id").mean()["fw"].mean(), 1)
             male_par_on_avgs = round(df_male[["player_id","par_on"]].groupby("player_id").mean()["par_on"].mean(), 1)
             male_putt_avgs = round(df_male[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
+            male_bunker_avgs = round(df_male[["player_id","bunker"]].groupby("player_id").mean()["bunker"].mean(), 1)
 
             #男それぞれの平均
-            allmale_score_avg = df_male[["player_id","total_score","ob","penalty","fw","par_on","putt"]].groupby("player_id").mean()
+            allmale_score_avg = df_male[["player_id","total_score","ob","penalty","fw","par_on","putt", "bunker"]].groupby("player_id").mean()
             male_60 = allmale_score_avg[allmale_score_avg["total_score"] < 70]
             male_70 = allmale_score_avg[(allmale_score_avg["total_score"] >= 70) & (allmale_score_avg["total_score"] < 80)]
             male_80 = allmale_score_avg[(allmale_score_avg["total_score"] >= 80) & (allmale_score_avg["total_score"] < 90)]
@@ -316,6 +325,7 @@ class Average(generic.ListView):
             male_fw_60 = round(male_60.mean()["fw"], 1)
             male_par_on_60 = round(male_60.mean()["par_on"], 1)
             male_putt_60 = round(male_60.mean()["putt"], 1)
+            male_bunker_60 = round(male_60.mean()["bunker"], 1)
 
             #男性70平均
             male_score_70 = round(male_70.mean()["total_score"], 1)
@@ -324,6 +334,7 @@ class Average(generic.ListView):
             male_fw_70 = round(male_70.mean()["fw"], 1)
             male_par_on_70 = round(male_70.mean()["par_on"], 1)
             male_putt_70 = round(male_70.mean()["putt"], 1)
+            male_bunker_70 = round(male_70.mean()["bunker"], 1)
 
             #男性80平均
             male_score_80 = round(male_80.mean()["total_score"], 1)
@@ -332,6 +343,7 @@ class Average(generic.ListView):
             male_fw_80 = round(male_80.mean()["fw"], 1)
             male_par_on_80 = round(male_80.mean()["par_on"], 1)
             male_putt_80 = round(male_80.mean()["putt"], 1)
+            male_bunker_80 = round(male_80.mean()["bunker"], 1)
             
             #男性90平均
             male_score_90 = round(male_90.mean()["total_score"], 1)
@@ -340,6 +352,7 @@ class Average(generic.ListView):
             male_fw_90 = round(male_90.mean()["fw"], 1)
             male_par_on_90 = round(male_90.mean()["par_on"], 1)
             male_putt_90 = round(male_90.mean()["putt"], 1)
+            male_bunker_90 = round(male_90.mean()["bunker"], 1)
 
             #男性100平均
             male_score_100 = round(male_100.mean()["total_score"], 1)
@@ -348,6 +361,7 @@ class Average(generic.ListView):
             male_fw_100 = round(male_100.mean()["fw"], 1)
             male_par_on_100 = round(male_100.mean()["par_on"], 1)
             male_putt_100 = round(male_100.mean()["putt"], 1)
+            male_bunker_100 = round(male_100.mean()["bunker"], 1)
 
             #男性110平均
             male_score_110 = round(male_110.mean()["total_score"], 1)
@@ -356,6 +370,7 @@ class Average(generic.ListView):
             male_fw_110 = round(male_110.mean()["fw"], 1)
             male_par_on_110 = round(male_110.mean()["par_on"], 1)
             male_putt_110 = round(male_110.mean()["putt"], 1)
+            male_bunker_110 = round(male_110.mean()["bunker"], 1)
 
             #男性120平均
             male_score_120 = round(male_120.mean()["total_score"], 1)
@@ -364,6 +379,8 @@ class Average(generic.ListView):
             male_fw_120 = round(male_120.mean()["fw"], 1)
             male_par_on_120 = round(male_120.mean()["par_on"], 1)
             male_putt_120 = round(male_120.mean()["putt"], 1)
+            male_bunker_120 = round(male_120.mean()["bunker"], 1)
+
 
             #男性平均cxt
             if f'{male_score_avgs}' != "nan":
@@ -373,6 +390,7 @@ class Average(generic.ListView):
                 context["male_fw_avgs"] = f'{male_fw_avgs}'+"%"
                 context["male_par_on_avgs"] = f'{male_par_on_avgs}'+"%"
                 context["male_putt_avgs"] = f'{male_putt_avgs}'
+                context["male_bunker_avgs"] = f'{male_bunker_avgs}'
             
             #男性60平均cxtf'{}'+""
             if f'{male_score_60}' != "nan":
@@ -382,6 +400,7 @@ class Average(generic.ListView):
                 context["male_fw_60"] = f'{male_fw_60}'+"%"
                 context["male_par_on_60"] = f'{male_par_on_60}'+"%"
                 context["male_putt_60"] = f'{male_putt_60}'
+                context["male_bunker_60"] = f'{male_bunker_60}'
 
             #男性70平均cxt
             if f'{male_score_70}' != "nan":
@@ -391,6 +410,7 @@ class Average(generic.ListView):
                 context["male_fw_70"] = f'{male_fw_70}'+"%"
                 context["male_par_on_70"] = f'{male_par_on_70}'+"%"
                 context["male_putt_70"] = f'{male_putt_70}'
+                context["male_bunker_70"] = f'{male_bunker_70}'
 
             #男性80平均cxt
             if f'{male_score_80}' != "nan":
@@ -400,6 +420,7 @@ class Average(generic.ListView):
                 context["male_fw_80"] = f'{male_fw_80}'+"%"
                 context["male_par_on_80"] = f'{male_par_on_80}'+"%"
                 context["male_putt_80"] = f'{male_putt_80}'
+                context["male_bunker_80"] = f'{male_bunker_80}'
 
             #男性90平均cxt
             if f'{male_score_90}' != "nan":
@@ -409,6 +430,7 @@ class Average(generic.ListView):
                 context["male_fw_90"] = f'{male_fw_90}'+"%"
                 context["male_par_on_90"] = f'{male_par_on_90}'+"%"
                 context["male_putt_90"] = f'{male_putt_90}'
+                context["male_bunker_90"] = f'{male_bunker_90}'
                 
             #男性100平均cxt
             if f'{male_score_100}' != "nan":
@@ -418,6 +440,7 @@ class Average(generic.ListView):
                 context["male_fw_100"] = f'{male_fw_100}'+"%"
                 context["male_par_on_100"] = f'{male_par_on_100}'+"%"
                 context["male_putt_100"] = f'{male_putt_100}'
+                context["male_bunker_100"] = f'{male_bunker_100}'
 
             if f'{male_score_110}' != "nan":
                 context["male_score_110"] = male_score_110
@@ -426,6 +449,7 @@ class Average(generic.ListView):
                 context["male_fw_110"] = f'{male_fw_110}'+"%"
                 context["male_par_on_110"] = f'{male_par_on_110}'+"%"
                 context["male_putt_110"] = f'{male_putt_110}'
+                context["male_bunker_110"] = f'{male_bunker_110}'
 
             if f'{male_score_120}' != "nan":
                 context["male_score_120"] = male_score_120
@@ -434,6 +458,7 @@ class Average(generic.ListView):
                 context["male_fw_120"] = f'{male_fw_120}'+"%"
                 context["male_par_on_120"] = f'{male_par_on_120}'+"%"
                 context["male_putt_120"] = f'{male_putt_120}'
+                context["male_bunker_120"] = f'{male_bunker_120}'
                 
         #女性↓
 
@@ -446,9 +471,10 @@ class Average(generic.ListView):
             female_fw_avgs = round(df_female[["player_id","fw"]].groupby("player_id").mean()["fw"].mean(), 1)
             female_par_on_avgs = round(df_female[["player_id","par_on"]].groupby("player_id").mean()["par_on"].mean(), 1)
             female_putt_avgs = round(df_female[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
+            female_bunker_avgs = round(df_female[["player_id","bunker"]].groupby("player_id").mean()["bunker"].mean(), 1)
 
             #女性それぞれの平均
-            allfemale_score_avg = df_female[["player_id","total_score","ob","penalty","fw","par_on","putt"]].groupby("player_id").mean()
+            allfemale_score_avg = df_female[["player_id","total_score","ob","penalty","fw","par_on","putt", "bunker"]].groupby("player_id").mean()
             female_60 = allfemale_score_avg[allfemale_score_avg["total_score"] < 70]
             female_70 = allfemale_score_avg[(allfemale_score_avg["total_score"] >= 70) & (allfemale_score_avg["total_score"] < 80)]
             female_80 = allfemale_score_avg[(allfemale_score_avg["total_score"] >= 80) & (allfemale_score_avg["total_score"] < 90)]
@@ -464,6 +490,7 @@ class Average(generic.ListView):
             female_fw_60 = round(female_60.mean()["fw"], 1)
             female_par_on_60 = round(female_60.mean()["par_on"], 1)
             female_putt_60 = round(female_60.mean()["putt"], 1)
+            female_bunker_60 = round(female_60.mean()["bunker"], 1)
 
             #女性70平均
             female_score_70 = round(female_70.mean()["total_score"], 1)
@@ -472,6 +499,7 @@ class Average(generic.ListView):
             female_fw_70 = round(female_70.mean()["fw"], 1)
             female_par_on_70 = round(female_70.mean()["par_on"], 1)
             female_putt_70 = round(female_70.mean()["putt"], 1)
+            female_bunker_70 = round(female_70.mean()["bunker"], 1)
 
             #女性80平均
             female_score_80 = round(female_80.mean()["total_score"], 1)
@@ -480,6 +508,7 @@ class Average(generic.ListView):
             female_fw_80 = round(female_80.mean()["fw"], 1)
             female_par_on_80 = round(female_80.mean()["par_on"], 1)
             female_putt_80 = round(female_80.mean()["putt"], 1)
+            female_bunker_80 = round(female_80.mean()["bunker"], 1)
             
             #女性90平均
             female_score_90 = round(female_90.mean()["total_score"], 1)
@@ -488,6 +517,7 @@ class Average(generic.ListView):
             female_fw_90 = round(female_90.mean()["fw"], 1)
             female_par_on_90 = round(female_90.mean()["par_on"], 1)
             female_putt_90 = round(female_90.mean()["putt"], 1)
+            female_bunker_90 = round(female_90.mean()["bunker"], 1)
 
             #女性100平均
             female_score_100 = round(female_100.mean()["total_score"], 1)
@@ -496,6 +526,7 @@ class Average(generic.ListView):
             female_fw_100 = round(female_100.mean()["fw"], 1)
             female_par_on_100 = round(female_100.mean()["par_on"], 1)
             female_putt_100 = round(female_100.mean()["putt"], 1)
+            female_bunker_100 = round(female_100.mean()["bunker"], 1)
 
             #女性110平均
             female_score_110 = round(female_110.mean()["total_score"], 1)
@@ -504,6 +535,7 @@ class Average(generic.ListView):
             female_fw_110 = round(female_110.mean()["fw"], 1)
             female_par_on_110 = round(female_110.mean()["par_on"], 1)
             female_putt_110 = round(female_110.mean()["putt"], 1)
+            female_bunker_110 = round(female_110.mean()["bunker"], 1)
 
             #女性120平均
             female_score_120 = round(female_120.mean()["total_score"], 1)
@@ -512,6 +544,8 @@ class Average(generic.ListView):
             female_fw_120 = round(female_120.mean()["fw"], 1)
             female_par_on_120 = round(female_120.mean()["par_on"], 1)
             female_putt_120 = round(female_120.mean()["putt"], 1)
+            female_bunker_120 = round(female_120.mean()["bunker"], 1)
+
 
             #女性平均cxt
             if f'{female_score_avgs}' != "nan":
@@ -521,7 +555,8 @@ class Average(generic.ListView):
                 context["female_fw_avgs"] = f'{female_fw_avgs}'+"%"
                 context["female_par_on_avgs"] = f'{female_par_on_avgs}'+"%"
                 context["female_putt_avgs"] = f'{female_putt_avgs}'
-
+                context["female_bunker_avgs"] = f'{female_bunker_avgs}'
+            
             #女性60平均cxtf'{}'+""
             if f'{female_score_60}' != "nan":
                 context["female_score_60"] = female_score_60
@@ -530,6 +565,7 @@ class Average(generic.ListView):
                 context["female_fw_60"] = f'{female_fw_60}'+"%"
                 context["female_par_on_60"] = f'{female_par_on_60}'+"%"
                 context["female_putt_60"] = f'{female_putt_60}'
+                context["female_bunker_60"] = f'{female_bunker_60}'
 
             #女性70平均cxt
             if f'{female_score_70}' != "nan":
@@ -539,6 +575,7 @@ class Average(generic.ListView):
                 context["female_fw_70"] = f'{female_fw_70}'+"%"
                 context["female_par_on_70"] = f'{female_par_on_70}'+"%"
                 context["female_putt_70"] = f'{female_putt_70}'
+                context["female_bunker_70"] = f'{female_bunker_70}'
 
             #女性80平均cxt
             if f'{female_score_80}' != "nan":
@@ -548,6 +585,7 @@ class Average(generic.ListView):
                 context["female_fw_80"] = f'{female_fw_80}'+"%"
                 context["female_par_on_80"] = f'{female_par_on_80}'+"%"
                 context["female_putt_80"] = f'{female_putt_80}'
+                context["female_bunker_80"] = f'{female_bunker_80}'
 
             #女性90平均cxt
             if f'{female_score_90}' != "nan":
@@ -557,6 +595,7 @@ class Average(generic.ListView):
                 context["female_fw_90"] = f'{female_fw_90}'+"%"
                 context["female_par_on_90"] = f'{female_par_on_90}'+"%"
                 context["female_putt_90"] = f'{female_putt_90}'
+                context["female_bunker_90"] = f'{female_bunker_90}'
                 
             #女性100平均cxt
             if f'{female_score_100}' != "nan":
@@ -566,6 +605,7 @@ class Average(generic.ListView):
                 context["female_fw_100"] = f'{female_fw_100}'+"%"
                 context["female_par_on_100"] = f'{female_par_on_100}'+"%"
                 context["female_putt_100"] = f'{female_putt_100}'
+                context["female_bunker_100"] = f'{female_bunker_100}'
 
             if f'{female_score_110}' != "nan":
                 context["female_score_110"] = female_score_110
@@ -574,6 +614,7 @@ class Average(generic.ListView):
                 context["female_fw_110"] = f'{female_fw_110}'+"%"
                 context["female_par_on_110"] = f'{female_par_on_110}'+"%"
                 context["female_putt_110"] = f'{female_putt_110}'
+                context["female_bunker_110"] = f'{female_bunker_110}'
 
             if f'{female_score_120}' != "nan":
                 context["female_score_120"] = female_score_120
@@ -582,91 +623,11 @@ class Average(generic.ListView):
                 context["female_fw_120"] = f'{female_fw_120}'+"%"
                 context["female_par_on_120"] = f'{female_par_on_120}'+"%"
                 context["female_putt_120"] = f'{female_putt_120}'
+                context["female_bunker_120"] = f'{female_bunker_120}'
 
 
 
         return context
-    
-"""
-def upload(request):
-    if 'csv' in request.FILES:
-        form_data = TextIOWrapper(request.FILES['csv'].file, encoding='utf-8')
-        csv_file = csv.reader(form_data)
-        for line in csv_file:
-            person, created = Person.objects.get_or_create(player_number=line[1])
-            person.login_user = request.user.id
-            person.name =line[0]
-            person.age = line[2]
-            person.sex = line[3]
-            person.save()
-
-            stat_number_check = Stat.objects.values("stat_number").all()
-            if line[11] not in f'{stat_number_check}':
-            
-                Stat.objects.create(
-                    player = Person.objects.get(player_number=line[1]),
-                    stat_number = line[11],
-                    date = line[4],
-                    total_score = line[5],
-                    ob = line[6],
-                    penalty = line[7],
-                    fw = line[8],
-                    par_on = line[9],
-                    putt = line[10],
-
-                )
-
-        
-        return redirect('score:person_list')
-
-
-    else:
-        return render(request, 'score/upload.html')
-
-
-class PostImport(generic.FormView):
-    template_name = 'score/upload.html'
-    success_url = reverse_lazy('score:person_list')
-    form_class = CSVUploadForm
-
-    def form_valid(self, form):
-        # csv.readerに渡すため、TextIOWrapperでテキストモードなファイルに変換
-        
-        form_data = io.TextIOWrapper(form.cleaned_data['file'], encoding='utf-8')
-        csv_file = csv.reader(form_data)
-        # 1行ずつ取り出し、作成していく
-        if form_data.name.endswith('.csv'):
-        
-            for line in csv_file:
-                person, created = Person.objects.get_or_create(player_number=line[1])
-                person.login_user = self.request.user.id
-                person.name =line[0]
-                person.age = line[2]
-                person.sex = line[3]
-                person.save()
-
-                stat_number_check = Stat.objects.values("stat_number").all()
-                if line[11] not in f'{stat_number_check}':
-                
-                    Stat.objects.create(
-                        player = Person.objects.get(player_number=line[1]),
-                        stat_number = line[11],
-                        date = line[4],
-                        total_score = line[5],
-                        ob = line[6],
-                        penalty = line[7],
-                        fw = line[8],
-                        par_on = line[9],
-                        putt = line[10],
-
-                    )
-            return super().form_valid(form)
-            
-        else:
-            messages.add_message(self.request, messages.ERROR, "csvファイルを選択してください")
-            return redirect('score:upload')
-        
-"""
 
 class PostImport(generic.FormView):
     template_name = 'score/upload.html'
@@ -693,11 +654,11 @@ class PostImport(generic.FormView):
                     stat_number_check =list(Stat.objects.values("stat_number").all())
                     stat_number_check = f'{stat_number_check}'
                     stat_number_check = stat_number_check.replace("}", "")
-                    if f': {line[11]},' not in f'{stat_number_check}' and f': {line[11]}]' not in f'{stat_number_check}':
+                    if f': {line[12]},' not in f'{stat_number_check}' and f': {line[12]}]' not in f'{stat_number_check}':
                     
                         Stat.objects.create(
                             player = Person.objects.get(player_number=line[1]),
-                            stat_number = line[11],
+                            stat_number = line[12],
                             date = line[4],
                             total_score = line[5],
                             ob = line[6],
@@ -705,6 +666,7 @@ class PostImport(generic.FormView):
                             fw = line[8],
                             par_on = line[9],
                             putt = line[10],
+                            bunker = line[11]
 
                         )
 

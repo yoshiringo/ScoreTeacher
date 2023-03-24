@@ -32,11 +32,8 @@ class Stat(models.Model):
     fw = models.PositiveSmallIntegerField(verbose_name='FWキープ率', blank=False, null=False)
     par_on = models.PositiveSmallIntegerField(verbose_name='パーオン率', blank=False, null=False)
     putt = models.PositiveSmallIntegerField(verbose_name='パット数', blank=False, null=False)
+    bunker = models.PositiveSmallIntegerField(verbose_name='バンカー数', blank=False, null=False)
     stat_number = models.IntegerField(null=True)
 
     def __str__(self):
         return f'#{self.pk} {self.player}'
-    
-    def all_score_avg(self):
-        return Stat.objects.filter(player=self.pk).aggregate(Avg("total_score"))
-        

@@ -29,7 +29,10 @@ class StatCreateForm(forms.ModelForm):
                                                   'class': 'form-control'}),
             'putt': forms.TextInput(attrs={'autocomplete': 'off',
                                                   'placeholder': 'パット数',
-                                                  'class': 'form-control'}),                                                                                                                                                        
+                                                  'class': 'form-control'}),
+            'bunker': forms.TextInput(attrs={'autocomplete': 'off',
+                                                  'placeholder': 'バンカー数',
+                                                  'class': 'form-control'}),                                                                                                                                                          
         }
 
 class PersonCreateForm(forms.ModelForm):
