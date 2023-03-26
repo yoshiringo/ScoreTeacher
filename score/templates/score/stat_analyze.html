@@ -13,15 +13,12 @@
     <div class="card-header text-white bg-info text-center ls-widest font-weight-bold">
       分析結果
     </div>
-    <div class="card-body" style="text-align: center">
-      <img src="data:image/png;base64,{{ chart| safe }}" width="500" height="500" onerror="this.style.display='none'"/>
+    <div class="card-body p-3" style="text-align: center">
+      <img src="data:image/png;base64,{{ chart| safe }}" width="600" height="600" onerror="this.style.display='none'"/>
       <p class="fs-3 fw-bold">{{ result_b }}の順番でスコアに関係あるようです。</p>
   </div>
 </div>
 </html>
-
-{{t_values}}
-{{z}}
 
 {% endautoescape %}
 {% endblock %}

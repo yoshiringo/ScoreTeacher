@@ -59,7 +59,7 @@ class StatCreate(generic.CreateView):
         check = any(map(str.isdigit, stats_str))
         context["check"] = check
 
-        paginator = Paginator(stats, 30)
+        paginator = Paginator(stats, 10)
         p = self.request.GET.get('p')
         stat_p = paginator.get_page(p)
         context["stat_p"] = stat_p
@@ -119,7 +119,9 @@ class StatCreate(generic.CreateView):
             bunker_avg = float(bunker_avg.replace("{'bunker__avg': ", "").replace("}", ""))
             bunker_avg = round(bunker_avg, 1)
             context["bunker_avg"] = bunker_avg
-        
+
+        log_u = list(Person.objects.values_list('login_user', flat=True).filter(player_number=1))
+        context["log_u"] = int(f'{self.request.user.id}'+"9")
         return context
 
     def form_valid(self, form):
@@ -177,102 +179,117 @@ class StatAnalyze(generic.DetailView):
         ]
 
         df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
-        df.columns = ["id", "player_id", "date", "total_score", "ob", "penalty", "fw", "par_on", "putt", "bunker", "stat_number"]
-        #全stat
-        z = df.drop(['id','player_id','date','stat_number'], axis=1)
+        df.columns = ["id", "player_id", "date", "スコア", "OB", "ペナルティ", "FWキープ", "パーオン", "パット", "バンカー", "stat_number"]
 
-        #statを標準化したもの
-        df_std = z.apply(lambda x: (x-x.mean())/x.std(), axis=0)
-        #statのtotal_score以外
-        x = df_std.drop(['total_score'], axis=1)
-        #total_score
-        y = df_std['total_score']
+        if len(df) > 7:
+            #全stat
+            z = df.drop(['id','player_id','date','stat_number'], axis=1)
 
-        reg = LinearRegression()
-        results = reg.fit(x,y)
-        coef = reg.coef_.round(4)
-        n = x.shape[0]
-        p = x.shape[1]
+            ob_true_count = f'{z.duplicated("OB")}'.count("True")
+            score_count = len(z)-1
+            if ob_true_count == score_count:
+                z.iat[1,1] = 101
 
-        y_hat = reg.predict(x)
-        sse = np.sum((y - y_hat) **2, axis=0)
-        sse = sse / (n - p - 1)
-        s = np.linalg.inv(np.dot(x.T, x))
-        std_err = np.sqrt(np.diagonal(sse * s)).round(4)
+            penalty_true_count = f'{z.duplicated("ペナルティ")}'.count("True")
+            if penalty_true_count == score_count:
+                z.iat[1,2] = 101
 
-        t_values = (coef / std_err).round(4)
+            fw_true_count = f'{z.duplicated("FWキープ")}'.count("True")
+            if fw_true_count == score_count:
+                z.iat[1,3] = 101
 
-        context["t_values"] = t_values
-        context["z"] = z
+            par_true_count = f'{z.duplicated("パーオン")}'.count("True")
+            if par_true_count == score_count:
+                z.iat[1,4] = 101
 
-        return context
+            putt_true_count = f'{z.duplicated("パット")}'.count("True")
+            if putt_true_count == score_count:
+                z.iat[1,5] = 101
+
+            bunker_true_count = f'{z.duplicated("バンカー")}'.count("True")
+            if bunker_true_count == score_count:
+                z.iat[1,6] = 101
+
+            #statを標準化
+            df_std = z.apply(lambda x: (x-x.mean())/x.std(), axis=0)
+            #statのスコア以外
+            x = df_std.drop(['スコア'], axis=1)
+            #スコア
+            y = df_std['スコア']
+
+            reg = LinearRegression()
+            results = reg.fit(x,y)
+            coef = reg.coef_.round(4)
+            n = x.shape[0]
+            p = x.shape[1]
+
+            y_hat = reg.predict(x)
+            sse = np.sum((y - y_hat) **2, axis=0)
+            sse = sse / (n - p - 1)
+            s = np.linalg.inv(np.dot(x.T, x))
+            std_err = np.sqrt(np.diagonal(sse * s)).round(4)
+
+            t_values = (coef / std_err).round(4)
+            t_values_abs = np.abs(t_values)
+            col = ["OB", "ペナルティ", "FWキープ", "パーオン", "パット", "バンカー"]
+            t_col = dict(zip(col, t_values_abs))
+            practice = sorted(t_col.items(), key=lambda x:x[1], reverse=True)
+        
+        else:
+            df_score = df.sort_values("スコア")
+            data_count = df["スコア"].count()
+            
+            df_patt = df.sort_values(by=["パット","スコア"])
+            patt_count = [abs(df_patt.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+            patt_score = sum(patt_count)
+            
+            df_fk = df.sort_values(by=["FWキープ","スコア"], ascending=[False,True])
+            fk_count = [abs(df_fk.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+            fk_score = sum(fk_count)
+            
+            df_po = df.sort_values(by=["パーオン","スコア"], ascending=[False,True])
+            po_count = [abs(df_po.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+            po_score = sum(po_count)
+            
+            df_OB = df.sort_values(by=["OB","スコア"])
+            OB_count = [abs(df_OB.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+            OB_score = sum(OB_count)
+            
+            df_pn = df.sort_values(by=["ペナルティ","スコア"])
+            pn_count = [abs(df_pn.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+            pn_score = sum(pn_count)
+
+            df_バンカー = df.sort_values(by=["バンカー","スコア"])
+            バンカー_count = [abs(df_バンカー.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+            バンカー_score = sum(バンカー_count)
+            
+            calc_add = 1/(OB_score+1) + 1/(pn_score+1) + 1/(fk_score+1) + 1/(po_score+1) + 1/(patt_score+1) + 1/(バンカー_score+1)
+            cf = 100 / calc_add
+
+            result = {"OB": round(cf / (OB_score+1), 1), "ペナルティ": round(cf / (pn_score+1), 1), "FWキープ": round(cf / (fk_score+1), 1), "パーオン": round(cf / (po_score+1), 1), "パット": round(cf / (patt_score+1),1), "バンカー": round(cf / (バンカー_score+1),1)}
+
+            practice = sorted(result.items(), key=lambda i: i[1], reverse=True)
+            
      
-        
-    """
-class StatAnalyze(generic.DetailView):
-    model = Person
-    template_name = "score/stat_analyze.html"
-    context_object_name = "person_stat"
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        pk = self.kwargs.get("pk")
-
-        context['breadcrumbs_list'] = [
-        {'name': 'Stats', 'url': f'/score/detail/{pk}/'},
-        {'name': '分析結果','url': ''}
-        ]
-
-        df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
-        
-        df.columns = ["id", "player_id", "date", "スコア", "OB数", "ペナルティ数", "FWキープ率", "パーオン率", "パット数", "stat_number"]
-        
-        df_score = df.sort_values("スコア")
-        data_count = df["スコア"].count()
-        
-        df_patt = df.sort_values(by=["パット数","スコア"])
-        patt_count = [abs(df_patt.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
-        patt_score = sum(patt_count)
-        
-        df_fk = df.sort_values(by=["FWキープ率","スコア"], ascending=[False,True])
-        fk_count = [abs(df_fk.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
-        fk_score = sum(fk_count)
-        
-        df_po = df.sort_values(by=["パーオン率","スコア"], ascending=[False,True])
-        po_count = [abs(df_po.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
-        po_score = sum(po_count)
-        
-        df_ob = df.sort_values(by=["OB数","スコア"])
-        ob_count = [abs(df_ob.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
-        ob_score = sum(ob_count)
-        
-        df_pn = df.sort_values(by=["ペナルティ数","スコア"])
-        pn_count = [abs(df_pn.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
-        pn_score = sum(pn_count)
-        
-        calc_add = 1/(ob_score+1) + 1/(pn_score+1) + 1/(fk_score+1) + 1/(po_score+1) + 1/(patt_score+1)
-        cf = 100 / calc_add
-
-        result = {"OB": round(cf / (ob_score+1), 1), "ペナルティ": round(cf / (pn_score+1), 1), "FWキープ": round(cf / (fk_score+1), 1), "パーオン": round(cf / (po_score+1), 1), "パット": round(cf / (patt_score+1),1)}
-
-        practice = sorted(result.items(), key=lambda i: i[1], reverse=True)
-        result = practice[0][0],practice[1][0],practice[2][0],practice[3][0],practice[4][0]
-        number = practice[0][1],practice[1][1],practice[2][1],practice[3][1],practice[4][1]
+            
+        result = practice[0][0],practice[1][0],practice[2][0],practice[3][0],practice[4][0],practice[5][0]
+        number = practice[0][1],practice[1][1],practice[2][1],practice[3][1],practice[4][1],practice[5][1]
 
         result_a = f'{result}'
         result_b = result_a.translate(str.maketrans({"(": "", ")": "", "'": ""}))
-        
-
-        context["result_b"] = result_b
 
         pie = [pie for pie in number]
         label = [label for label in result]
         chart = plugin_plotly.Plot_PieChart(pie, label)
+
         context["chart"] = chart
+        context["result_b"] = result_b
+
+        log_u = Person.objects.values_list('login_user', flat=True).filter(player_number=1)
+        context["log_u"] = log_u
+        context["nl"] = self.request.user.id
 
         return context
-
-        """
 
 class StatDelete(generic.DeleteView):
     model = Stat
@@ -638,13 +655,14 @@ class PostImport(generic.FormView):
         # csv.readerに渡すため、TextIOWrapperでテキストモードなファイルに変換
         form_data = io.TextIOWrapper(form.cleaned_data['file'], encoding='utf-8')
         csv_file = csv.reader(form_data)
-        stat_before_import = Stat.objects.all()
+        login_user_id = self.request.user.id
         # 1行ずつ取り出し、作成していく
         if form_data.name.endswith('.csv'):
         
             for line in csv_file:
                 try:
-                    person, created = Person.objects.get_or_create(player_number=line[1])
+                    """if f'[{self.request.user.id}]' != list(Person.objects.values_list('login_user', flat=True).filter(player_number=int(f'{self.request.user.id}'+000000+f'{line[1]}'))):"""
+                    person, created = Person.objects.get_or_create(player_number=int(f'{self.request.user.id}'+"000000"+f'{line[1]}'))
                     person.login_user = self.request.user.id
                     person.name =line[0]
                     person.age = line[2]
@@ -654,11 +672,12 @@ class PostImport(generic.FormView):
                     stat_number_check =list(Stat.objects.values("stat_number").all())
                     stat_number_check = f'{stat_number_check}'
                     stat_number_check = stat_number_check.replace("}", "")
-                    if f': {line[12]},' not in f'{stat_number_check}' and f': {line[12]}]' not in f'{stat_number_check}':
+                    s_check = int(f'{self.request.user.id}'+"000000"+f'{line[12]}')
+                    if f': {s_check},' not in f'{stat_number_check}' and f': {s_check}]' not in f'{stat_number_check}':
                     
                         Stat.objects.create(
-                            player = Person.objects.get(player_number=line[1]),
-                            stat_number = line[12],
+                            player = Person.objects.get(player_number=int(f'{self.request.user.id}'+"000000"f'{line[1]}')),
+                            stat_number = int(f'{self.request.user.id}'+"000000"+f'{line[12]}'),
                             date = line[4],
                             total_score = line[5],
                             ob = line[6],
@@ -667,7 +686,6 @@ class PostImport(generic.FormView):
                             par_on = line[9],
                             putt = line[10],
                             bunker = line[11]
-
                         )
 
                 except:
@@ -680,4 +698,3 @@ class PostImport(generic.FormView):
         else:
             messages.add_message(self.request, messages.ERROR, "csvファイルを選択してください")
             return redirect('score:upload')
-        

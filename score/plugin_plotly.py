@@ -15,10 +15,10 @@ def Output_Graph():
 
 def Plot_PieChart(p,l):
     plt.rcParams['font.family'] = 'Hiragino Maru Gothic Pro'
-    c = ["cyan", 'tomato', 'gold', 'lawngreen',"hotpink"]
+    c = ["cyan", 'tomato', 'gold', 'lawngreen',"hotpink", "lavenderblush"]
     plt.switch_backend("AGG")
     plt.figure(figsize=(6,6))
-    plt.pie(p, autopct="%d%%", labels = l, colors = c, counterclock=False, startangle=90, radius=1.2, center=(0, 0))
+    plt.pie(p, autopct="%d%%", labels = l, colors = c, counterclock=False, startangle=90, radius=1.2, center=(0, 0), pctdistance=0.7)
     
     graph = Output_Graph()
     return graph
