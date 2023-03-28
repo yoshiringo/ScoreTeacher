@@ -6,6 +6,7 @@
 {% block content %}
 <html lang="ja" dir="ltr">
 
+
 <head>
 <meta charset="utf-8">
 {% bootstrap_css %}
@@ -13,38 +14,42 @@
 <link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
 </head>
 <body>
-
-<div>
-   <body background="{% static 'accounts/img/golf-g69cefbbf7_1920.jpg' %}"></body>
-      <div id="content" class="bg-transparent w-50 h-0 position-relative top-0 start-50 translate-middle-x text-center">
-         <div class="login">
-            {% include "accounts/components/header.html" %}
-            <h1 class="p-3 fw-bold text-dark">ログイン画面</h1>
-         
-            <div class="d-flex justify-content-center fw-bold">
-               <form method="post" action="{% url 'accounts:login' %}">
-                  {% csrf_token %}
-         
-                  <table class="fs-5 text-dark">
-                  <tr>
-                  <td><label for="userid">ユーザーID:</label></td>
-                  <td id="user" ><input type="text" name="userid"></td>
-                  <td><label for="password">パスワード：</label></td>
-                  <td id="user" ><input type="password" name="password"></td>
-                  </tr>
-                  </table>
-         
-                  <input type="submit" class="btn m-3 bg-danger text-light" value="login">
-               </form>
+   <div>
+      <body background="{% static 'accounts/img/golf-g69cefbbf7_1920.jpg' %}"></body>
+         <div id="content" class="bg-transparent w-50 h-0 position-relative top-0 start-50 translate-middle-x text-center">
+            <div class="login">
+               {% include "accounts/components/header.html" %}
+               <h1 class="p-3 fw-bold text-dark">ログイン画面</h1>
+            
+               <div class="d-flex justify-content-center fw-bold">
+                  <form method="post" action="{% url 'accounts:login' %}">
+                     {% csrf_token %}
+            
+                     <table class="fs-5 text-dark">
+                     <tr>
+                     <td><label for="userid">ユーザーID:</label></td>
+                     <td id="user" ><input type="text" name="userid"></td>
+                     <td><label for="password">パスワード：</label></td>
+                     <td id="user" ><input type="password" name="password"></td>
+                     </tr>
+                     </table>
+            
+                     <input type="submit" class="btn m-3 bg-danger text-light" value="login">
+                     {% for message in messages %}
+                     <p {% if message.tags %}class="{{ message.tags }} w-75 position-relative top-0 start-50 translate-middle-x"{% endif %}>
+                           {{ message }}
+                     </p>
+                     {% endfor %}
+                  </form>
+               </div>
+            </div>
+            
+            <div class="p-2 border-top border-5 border-success w-50 h-0 position-relative start-50 translate-middle-x text-center property mt-5">
+               <p class="m-3 fs-2 fw-bold text-dark">初めての方はこちら</p>
+               <a class="btn m-3 bg-danger text-light fw-bold" href="{% url 'accounts:register' %}">アカウントを作成</a>
             </div>
          </div>
-         
-         <div class="p-2 border-top border-5 border-success w-50 h-0 position-relative start-50 translate-middle-x text-center property mt-5">
-            <p class="m-3 fs-2 fw-bold text-dark">初めての方はこちら</p>
-            <a class="btn m-3 bg-danger text-light fw-bold" href="{% url 'accounts:register' %}">アカウントを作成</a>
-         </div>
-      </div>
-</div>
+   </div>
 
 </body>
 </html>

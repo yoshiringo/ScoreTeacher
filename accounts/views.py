@@ -6,6 +6,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import redirect
 
 class  AccountRegistration(TemplateView):
 
@@ -82,7 +84,8 @@ def Login(request):
                 return HttpResponse("アカウントが有効ではありません")
         # ユーザー認証失敗
         else:
-            return HttpResponse("ログインIDまたはパスワードが間違っています")
+            messages.add_message(request, messages.ERROR, "ユーザーIDかパスワードが間違っています")
+            return redirect('accounts:login')
     # GET
     else:
         return render(request, 'accounts/login.html')

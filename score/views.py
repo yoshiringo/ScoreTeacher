@@ -56,50 +56,39 @@ class StatCreate(generic.CreateView):
         context["check"] = any(map(str.isdigit, stats_str))
         context["stat_p"] = Paginator(stats, 10).get_page(self.request.GET.get('p'))
 
-        score_avg = Stat.objects.filter(player=pk).aggregate(Avg("total_score"))
-        score_avg = f'{score_avg}'
-        score_avg_check = any(map(str.isdigit, f'{score_avg}'))
-        if score_avg_check == True:
+        if Stat.objects.filter(player=pk).all().exists() == True:
+
+            score_avg = Stat.objects.filter(player=pk).aggregate(Avg("total_score"))
+            score_avg = f'{score_avg}'
             context["score_avg"] = round(float(score_avg.replace("{'total_score__avg': ", "").replace("}", "")),1)
-                    
-        ob_avg = Stat.objects.filter(player=pk).aggregate(Avg("ob"))
-        ob_avg = f'{ob_avg}'
-        ob_avg_check = any(map(str.isdigit, ob_avg))
-        if  ob_avg_check == True:
+                        
+            ob_avg = Stat.objects.filter(player=pk).aggregate(Avg("ob"))
+            ob_avg = f'{ob_avg}'
             context["ob_avg"] = round(float(ob_avg.replace("{'ob__avg': ", "").replace("}", "")), 1)
 
-        penalty_avg = Stat.objects.filter(player=pk).aggregate(Avg("penalty"))
-        penalty_avg = f'{penalty_avg}'
-        score_avg_check = any(map(str.isdigit, penalty_avg))
-        if  score_avg_check == True:
+            penalty_avg = Stat.objects.filter(player=pk).aggregate(Avg("penalty"))
+            penalty_avg = f'{penalty_avg}'
+
             context["penalty_avg"] = round(float(penalty_avg.replace("{'penalty__avg': ", "").replace("}", "")), 1)
 
-        fw_avg = Stat.objects.filter(player=pk).aggregate(Avg("fw"))
-        fw_avg = f'{fw_avg}'
-        score_avg_check = any(map(str.isdigit, fw_avg))
-        if  score_avg_check == True:
+            fw_avg = Stat.objects.filter(player=pk).aggregate(Avg("fw"))
+            fw_avg = f'{fw_avg}'
+
             context["fw_avg"] = round(float(fw_avg.replace("{'fw__avg': ", "").replace("}", "")), 1)
-        
-        par_on_avg = Stat.objects.filter(player=pk).aggregate(Avg("par_on"))
-        par_on_avg = f'{par_on_avg}'
-        score_avg_check = any(map(str.isdigit, par_on_avg))
-        if  score_avg_check == True:
+            
+            par_on_avg = Stat.objects.filter(player=pk).aggregate(Avg("par_on"))
+            par_on_avg = f'{par_on_avg}'
             context["par_on_avg"] = round(float(par_on_avg.replace("{'par_on__avg': ", "").replace("}", "")), 1)
 
-        putt_avg = Stat.objects.filter(player=pk).aggregate(Avg("putt"))
-        putt_avg = f'{putt_avg}'
-        score_avg_check = any(map(str.isdigit, putt_avg))
-        if  score_avg_check == True:
+            putt_avg = Stat.objects.filter(player=pk).aggregate(Avg("putt"))
+            putt_avg = f'{putt_avg}'
+
             context["putt_avg"] = round(float(putt_avg.replace("{'putt__avg': ", "").replace("}", "")), 1)
 
-        bunker_avg = Stat.objects.filter(player=pk).aggregate(Avg("bunker"))
-        bunker_avg = f'{bunker_avg}'
-        score_avg_check = any(map(str.isdigit, bunker_avg))
-        if  score_avg_check == True:
+            bunker_avg = Stat.objects.filter(player=pk).aggregate(Avg("bunker"))
+            bunker_avg = f'{bunker_avg}'
+
             context["bunker_avg"] = round(float(bunker_avg.replace("{'bunker__avg': ", "").replace("}", "")), 1)
-
-
-        context["a"] = list(Stat.objects.filter(player=pk).all())
 
         return context
 
@@ -257,12 +246,7 @@ class StatAnalyze(generic.DetailView):
         result_a = f'{result}'.translate(str.maketrans({"(": "", ")": "", "'": ""}))
 
         context["chart"] = plugin_plotly.Plot_PieChart([pie for pie in number], [label for label in result])
-        context["result_a"] = result_a
-
-        context["check"] = list(Person.objects.values_list('login_user', flat=True).filter(player_number=int(f'{self.request.user.id}'+"000000"+"1")))
-        context["check_b"] = t_values_abs[0]
-
-        
+        context["result_a"] = result_a        
 
         return context
 
@@ -630,7 +614,6 @@ class PostImport(generic.FormView):
         # csv.readerに渡すため、TextIOWrapperでテキストモードなファイルに変換
         form_data = io.TextIOWrapper(form.cleaned_data['file'], encoding='utf-8')
         csv_file = csv.reader(form_data)
-        login_user_id = self.request.user.id
         # 1行ずつ取り出し、作成していく
         if form_data.name.endswith('.csv'):
         
@@ -667,13 +650,11 @@ class PostImport(generic.FormView):
                     messages.add_message(self.request, messages.ERROR, "内容が正しいか等確認してください")
                     return redirect('score:upload')
         
-
             return super().form_valid(form)
             
         else:
             messages.add_message(self.request, messages.ERROR, "csvファイルを選択してください")
             return redirect('score:upload')
-
 
 def csv_export(request):
     response = HttpResponse(content_type='text/csv; charset=Shift-JIS')
@@ -779,7 +760,12 @@ def csv_export(request):
                 calc_add = 1/(OB_score+1) + 1/(pn_score+1) + 1/(fk_score+1) + 1/(po_score+1) + 1/(patt_score+1) + 1/(バンカー_score+1)
                 cf = 100 / calc_add
 
-                practice = {"OB": round(cf / (OB_score+1), 1), "ペナルティ": round(cf / (pn_score+1), 1), "FWキープ": round(cf / (fk_score+1), 1), "パーオン": round(cf / (po_score+1), 1), "パット": round(cf / (patt_score+1),1), "バンカー": round(cf / (バンカー_score+1),1)}
+                practice = {"OB": round(cf / (OB_score+1), 1),
+                            "ペナルティ": round(cf / (pn_score+1), 1),
+                            "FWキープ": round(cf / (fk_score+1), 1),
+                            "パーオン": round(cf / (po_score+1), 1),
+                            "パット": round(cf / (patt_score+1),1),
+                            "バンカー": round(cf / (バンカー_score+1),1)}
 
             score_avg = Stat.objects.filter(player=pk).aggregate(Avg("total_score"))
                         
@@ -794,18 +780,17 @@ def csv_export(request):
             putt_avg = Stat.objects.filter(player=pk).aggregate(Avg("putt"))
 
             bunker_avg = Stat.objects.filter(player=pk).aggregate(Avg("bunker"))
+
             blank = ""
-
-
-
-
-
             player_name = list(Person.objects.values_list("name", flat=True).filter(id=pk))
             player_name = f'{player_name}'.replace("['", "").replace("']", "")
-            writer.writerow([player_name,blank,practice["OB"],practice["ペナルティ"],practice["FWキープ"],practice["パーオン"],practice["パット"],practice["バンカー"],blank,round(score_avg["total_score__avg"],1),round(ob_avg["ob__avg"],1),round(penalty_avg["penalty__avg"],1),round(fw_avg["fw__avg"],1),round(par_on_avg["par_on__avg"],1),round(putt_avg["putt__avg"],1),round(bunker_avg["bunker__avg"],1)])
-            """
-                    writer.writerow([player_name,blank,practice["OB"],practice["ペナルティ"],practice["FWキープ"],practice["パーオン"],practice["パット"],practice["バンカー"],blank,round(score_avg["total_score__avg"],1),round(ob_avg["ob_avg__avg"],1),round(penalty_avg["penalty_avg__avg"],1),round(fw_avg["fw_avg__avg"],1),round(par_on_avg["par_on_avg__avg"],1),round(putt_avg["putt_avg__avg"],1),round(bunker_avg["bunker_avg__avg"],1)])
-
-            """
+            writer.writerow([player_name,blank,practice["OB"],practice["ペナルティ"],practice["FWキープ"],practice["パーオン"],practice["パット"],practice["バンカー"],blank,
+                             round(score_avg["total_score__avg"],1),
+                             round(ob_avg["ob__avg"],1),
+                             round(penalty_avg["penalty__avg"],1),
+                             round(fw_avg["fw__avg"],1),
+                             round(par_on_avg["par_on__avg"],1),
+                             round(putt_avg["putt__avg"],1),
+                             round(bunker_avg["bunker__avg"],1)])         
     
     return response
