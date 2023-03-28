@@ -12,4 +12,5 @@ urlpatterns = [
     path("stat_analyze/<int:pk>/", views.StatAnalyze.as_view(), name="stat_analyze"),
     path("average/", views.Average.as_view(), name="average"),
     path('upload/', views.PostImport.as_view(), name='upload'),
+    path('export/', views.csv_export, name='csv_export'),
 ]

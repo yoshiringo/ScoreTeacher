@@ -15,7 +15,8 @@ import io
 from django.contrib import messages
 from sklearn.linear_model import LinearRegression
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+from django.http import HttpResponse
+import csv,urllib
 
 # Create your views here.
 
@@ -30,12 +31,9 @@ class PersonList(generic.ListView):
         personlist = Person.objects.filter(login_user=login_user_id)
         person_user = Person.objects.values_list('login_user', flat=True).filter(login_user=login_user_id)
         if person_user.exists() == False:
-            player_add = "プレイヤーを追加してください"
-            context["player_add"] = player_add 
+            context["player_add"] = "プレイヤーを追加してください" 
 
-        paginator = Paginator(personlist, 10)
-        p = self.request.GET.get('p')
-        persons = paginator.get_page(p)
+        persons = Paginator(personlist, 10).get_page(self.request.GET.get('p'))
 
         context["persons"] = persons
         context["person_user"] = person_user
@@ -50,78 +48,59 @@ class StatCreate(generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         pk = self.kwargs.get("pk")
-        person = get_object_or_404(Person, pk=pk)
-        context["person"] = person
+        context["person"] = get_object_or_404(Person, pk=pk)
         stats = Stat.objects.filter(player=pk).order_by("date")
         context['breadcrumbs_list'] = [{'name': 'Stats',
                                          'url': ''}]
         stats_str = f'{stats}'
-        check = any(map(str.isdigit, stats_str))
-        context["check"] = check
-
-        paginator = Paginator(stats, 10)
-        p = self.request.GET.get('p')
-        stat_p = paginator.get_page(p)
-        context["stat_p"] = stat_p
+        context["check"] = any(map(str.isdigit, stats_str))
+        context["stat_p"] = Paginator(stats, 10).get_page(self.request.GET.get('p'))
 
         score_avg = Stat.objects.filter(player=pk).aggregate(Avg("total_score"))
         score_avg = f'{score_avg}'
-        score_avg_check = any(map(str.isdigit, score_avg))
+        score_avg_check = any(map(str.isdigit, f'{score_avg}'))
         if score_avg_check == True:
-            score_avg = float(score_avg.replace("{'total_score__avg': ", "").replace("}", ""))
-            score_avg = round(score_avg, 1)
-            context["score_avg"] = score_avg
+            context["score_avg"] = round(float(score_avg.replace("{'total_score__avg': ", "").replace("}", "")),1)
                     
         ob_avg = Stat.objects.filter(player=pk).aggregate(Avg("ob"))
         ob_avg = f'{ob_avg}'
         ob_avg_check = any(map(str.isdigit, ob_avg))
         if  ob_avg_check == True:
-            ob_avg = float(ob_avg.replace("{'ob__avg': ", "").replace("}", ""))
-            ob_avg = round(ob_avg, 1)
-            context["ob_avg"] = ob_avg
+            context["ob_avg"] = round(float(ob_avg.replace("{'ob__avg': ", "").replace("}", "")), 1)
 
         penalty_avg = Stat.objects.filter(player=pk).aggregate(Avg("penalty"))
         penalty_avg = f'{penalty_avg}'
         score_avg_check = any(map(str.isdigit, penalty_avg))
         if  score_avg_check == True:
-            penalty_avg = float(penalty_avg.replace("{'penalty__avg': ", "").replace("}", ""))
-            penalty_avg = round(penalty_avg, 1)
-            context["penalty_avg"] = penalty_avg
+            context["penalty_avg"] = round(float(penalty_avg.replace("{'penalty__avg': ", "").replace("}", "")), 1)
 
         fw_avg = Stat.objects.filter(player=pk).aggregate(Avg("fw"))
         fw_avg = f'{fw_avg}'
         score_avg_check = any(map(str.isdigit, fw_avg))
         if  score_avg_check == True:
-            fw_avg = float(fw_avg.replace("{'fw__avg': ", "").replace("}", ""))
-            fw_avg = round(fw_avg, 1)
-            context["fw_avg"] = fw_avg
+            context["fw_avg"] = round(float(fw_avg.replace("{'fw__avg': ", "").replace("}", "")), 1)
         
         par_on_avg = Stat.objects.filter(player=pk).aggregate(Avg("par_on"))
         par_on_avg = f'{par_on_avg}'
         score_avg_check = any(map(str.isdigit, par_on_avg))
         if  score_avg_check == True:
-            par_on_avg = float(par_on_avg.replace("{'par_on__avg': ", "").replace("}", ""))
-            par_on_avg = round(par_on_avg, 1)
-            context["par_on_avg"] = par_on_avg
+            context["par_on_avg"] = round(float(par_on_avg.replace("{'par_on__avg': ", "").replace("}", "")), 1)
 
         putt_avg = Stat.objects.filter(player=pk).aggregate(Avg("putt"))
         putt_avg = f'{putt_avg}'
         score_avg_check = any(map(str.isdigit, putt_avg))
         if  score_avg_check == True:
-            putt_avg = float(putt_avg.replace("{'putt__avg': ", "").replace("}", ""))
-            putt_avg = round(putt_avg, 1)
-            context["putt_avg"] = putt_avg
+            context["putt_avg"] = round(float(putt_avg.replace("{'putt__avg': ", "").replace("}", "")), 1)
 
         bunker_avg = Stat.objects.filter(player=pk).aggregate(Avg("bunker"))
         bunker_avg = f'{bunker_avg}'
         score_avg_check = any(map(str.isdigit, bunker_avg))
         if  score_avg_check == True:
-            bunker_avg = float(bunker_avg.replace("{'bunker__avg': ", "").replace("}", ""))
-            bunker_avg = round(bunker_avg, 1)
-            context["bunker_avg"] = bunker_avg
+            context["bunker_avg"] = round(float(bunker_avg.replace("{'bunker__avg': ", "").replace("}", "")), 1)
 
-        log_u = list(Person.objects.values_list('login_user', flat=True).filter(player_number=1))
-        context["log_u"] = int(f'{self.request.user.id}'+"9")
+
+        context["a"] = list(Stat.objects.filter(player=pk).all())
+
         return context
 
     def form_valid(self, form):
@@ -275,19 +254,15 @@ class StatAnalyze(generic.DetailView):
         result = practice[0][0],practice[1][0],practice[2][0],practice[3][0],practice[4][0],practice[5][0]
         number = practice[0][1],practice[1][1],practice[2][1],practice[3][1],practice[4][1],practice[5][1]
 
-        result_a = f'{result}'
-        result_b = result_a.translate(str.maketrans({"(": "", ")": "", "'": ""}))
+        result_a = f'{result}'.translate(str.maketrans({"(": "", ")": "", "'": ""}))
 
-        pie = [pie for pie in number]
-        label = [label for label in result]
-        chart = plugin_plotly.Plot_PieChart(pie, label)
+        context["chart"] = plugin_plotly.Plot_PieChart([pie for pie in number], [label for label in result])
+        context["result_a"] = result_a
 
-        context["chart"] = chart
-        context["result_b"] = result_b
+        context["check"] = list(Person.objects.values_list('login_user', flat=True).filter(player_number=int(f'{self.request.user.id}'+"000000"+"1")))
+        context["check_b"] = t_values_abs[0]
 
-        log_u = Person.objects.values_list('login_user', flat=True).filter(player_number=1)
-        context["log_u"] = log_u
-        context["nl"] = self.request.user.id
+        
 
         return context
 
@@ -661,13 +636,13 @@ class PostImport(generic.FormView):
         
             for line in csv_file:
                 try:
-                    """if f'[{self.request.user.id}]' != list(Person.objects.values_list('login_user', flat=True).filter(player_number=int(f'{self.request.user.id}'+000000+f'{line[1]}'))):"""
-                    person, created = Person.objects.get_or_create(player_number=int(f'{self.request.user.id}'+"000000"+f'{line[1]}'))
-                    person.login_user = self.request.user.id
-                    person.name =line[0]
-                    person.age = line[2]
-                    person.sex = line[3]
-                    person.save()
+                    if f'[{self.request.user.id}]' != list(Person.objects.values_list('login_user', flat=True).filter(player_number=int(f'{self.request.user.id}'+"000000"+f'{line[1]}'))):
+                        person, created = Person.objects.get_or_create(player_number=int(f'{self.request.user.id}'+"000000"+f'{line[1]}'))
+                        person.login_user = self.request.user.id
+                        person.name =line[0]
+                        person.age = line[2]
+                        person.sex = line[3]
+                        person.save()
 
                     stat_number_check =list(Stat.objects.values("stat_number").all())
                     stat_number_check = f'{stat_number_check}'
@@ -698,3 +673,139 @@ class PostImport(generic.FormView):
         else:
             messages.add_message(self.request, messages.ERROR, "csvファイルを選択してください")
             return redirect('score:upload')
+
+
+def csv_export(request):
+    response = HttpResponse(content_type='text/csv; charset=Shift-JIS')
+    filename = urllib.parse.quote((u'仮ファイル.csv').encode("utf8"))
+    response['Content-Disposition'] = 'attachment; filename*=UTF-8\'\'{}'.format(filename)
+    writer = csv.writer(response)
+    header = ["名前","影響度",'OB', 'ペナルティ', 'FWキープ','パーオン',"パット","バンカー","stats平均","スコア","OB数","ペナルティ数","FWキープ率","パーオン率","パット数","バンカー数"]
+    writer.writerow(header)
+
+    pks = list(Person.objects.values_list('id', flat=True).all())
+    for pk in pks:
+
+        if Stat.objects.filter(player=pk).all().exists() == True:
+
+            df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
+            df.columns = ["id", "player_id", "date", "スコア", "OB", "ペナルティ", "FWキープ", "パーオン", "パット", "バンカー", "stat_number"]
+
+            if len(df) > 7:
+                #全stat
+                z = df.drop(['id','player_id','date','stat_number'], axis=1)
+
+                ob_true_count = f'{z.duplicated("OB")}'.count("True")
+                score_count = len(z)-1
+                if ob_true_count == score_count:
+                    z.iat[1,1] = 101
+
+                penalty_true_count = f'{z.duplicated("ペナルティ")}'.count("True")
+                if penalty_true_count == score_count:
+                    z.iat[1,2] = 101
+
+                fw_true_count = f'{z.duplicated("FWキープ")}'.count("True")
+                if fw_true_count == score_count:
+                    z.iat[1,3] = 101
+
+                par_true_count = f'{z.duplicated("パーオン")}'.count("True")
+                if par_true_count == score_count:
+                    z.iat[1,4] = 101
+
+                putt_true_count = f'{z.duplicated("パット")}'.count("True")
+                if putt_true_count == score_count:
+                    z.iat[1,5] = 101
+
+                bunker_true_count = f'{z.duplicated("バンカー")}'.count("True")
+                if bunker_true_count == score_count:
+                    z.iat[1,6] = 101
+
+                #statを標準化
+                df_std = z.apply(lambda x: (x-x.mean())/x.std(), axis=0)
+                #statのスコア以外
+                x = df_std.drop(['スコア'], axis=1)
+                #スコア
+                y = df_std['スコア']
+
+                reg = LinearRegression()
+                results = reg.fit(x,y)
+                coef = reg.coef_.round(4)
+                n = x.shape[0]
+                p = x.shape[1]
+
+                y_hat = reg.predict(x)
+                sse = np.sum((y - y_hat) **2, axis=0)
+                sse = sse / (n - p - 1)
+                s = np.linalg.inv(np.dot(x.T, x))
+                std_err = np.sqrt(np.diagonal(sse * s)).round(4)
+
+                t_values = (coef / std_err).round(4)
+                t_values_abs = np.abs(t_values)
+                t_add = t_values_abs[0] + t_values_abs[1] + t_values_abs[2] + t_values_abs[3] + t_values_abs[4] + t_values_abs[5]
+                x = 100 / t_add
+                t_values_abs = (x * t_values_abs).round(1)
+                
+                col = ["OB", "ペナルティ", "FWキープ", "パーオン", "パット", "バンカー"]
+                practice = dict(zip(col, t_values_abs))
+            
+            else:
+                df_score = df.sort_values("スコア")
+                data_count = df["スコア"].count()
+                
+                df_patt = df.sort_values(by=["パット","スコア"])
+                patt_count = [abs(df_patt.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+                patt_score = sum(patt_count)
+                
+                df_fk = df.sort_values(by=["FWキープ","スコア"], ascending=[False,True])
+                fk_count = [abs(df_fk.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+                fk_score = sum(fk_count)
+                
+                df_po = df.sort_values(by=["パーオン","スコア"], ascending=[False,True])
+                po_count = [abs(df_po.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+                po_score = sum(po_count)
+                
+                df_OB = df.sort_values(by=["OB","スコア"])
+                OB_count = [abs(df_OB.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+                OB_score = sum(OB_count)
+                
+                df_pn = df.sort_values(by=["ペナルティ","スコア"])
+                pn_count = [abs(df_pn.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+                pn_score = sum(pn_count)
+
+                df_バンカー = df.sort_values(by=["バンカー","スコア"])
+                バンカー_count = [abs(df_バンカー.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+                バンカー_score = sum(バンカー_count)
+                
+                calc_add = 1/(OB_score+1) + 1/(pn_score+1) + 1/(fk_score+1) + 1/(po_score+1) + 1/(patt_score+1) + 1/(バンカー_score+1)
+                cf = 100 / calc_add
+
+                practice = {"OB": round(cf / (OB_score+1), 1), "ペナルティ": round(cf / (pn_score+1), 1), "FWキープ": round(cf / (fk_score+1), 1), "パーオン": round(cf / (po_score+1), 1), "パット": round(cf / (patt_score+1),1), "バンカー": round(cf / (バンカー_score+1),1)}
+
+            score_avg = Stat.objects.filter(player=pk).aggregate(Avg("total_score"))
+                        
+            ob_avg = Stat.objects.filter(player=pk).aggregate(Avg("ob"))
+
+            penalty_avg = Stat.objects.filter(player=pk).aggregate(Avg("penalty"))
+
+            fw_avg = Stat.objects.filter(player=pk).aggregate(Avg("fw"))
+            
+            par_on_avg = Stat.objects.filter(player=pk).aggregate(Avg("par_on"))
+
+            putt_avg = Stat.objects.filter(player=pk).aggregate(Avg("putt"))
+
+            bunker_avg = Stat.objects.filter(player=pk).aggregate(Avg("bunker"))
+            blank = ""
+
+
+
+
+
+            player_name = list(Person.objects.values_list("name", flat=True).filter(id=pk))
+            player_name = f'{player_name}'.replace("['", "").replace("']", "")
+            writer.writerow([player_name,blank,practice["OB"],practice["ペナルティ"],practice["FWキープ"],practice["パーオン"],practice["パット"],practice["バンカー"],blank,round(score_avg["total_score__avg"],1),round(ob_avg["ob__avg"],1),round(penalty_avg["penalty__avg"],1),round(fw_avg["fw__avg"],1),round(par_on_avg["par_on__avg"],1),round(putt_avg["putt__avg"],1),round(bunker_avg["bunker__avg"],1)])
+            """
+                    writer.writerow([player_name,blank,practice["OB"],practice["ペナルティ"],practice["FWキープ"],practice["パーオン"],practice["パット"],practice["バンカー"],blank,round(score_avg["total_score__avg"],1),round(ob_avg["ob_avg__avg"],1),round(penalty_avg["penalty_avg__avg"],1),round(fw_avg["fw_avg__avg"],1),round(par_on_avg["par_on_avg__avg"],1),round(putt_avg["putt_avg__avg"],1),round(bunker_avg["bunker_avg__avg"],1)])
+
+            """
+    
+    return response

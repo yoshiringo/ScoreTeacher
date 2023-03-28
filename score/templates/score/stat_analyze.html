@@ -15,10 +15,13 @@
     </div>
     <div class="card-body p-3" style="text-align: center">
       <img src="data:image/png;base64,{{ chart| safe }}" width="600" height="600" onerror="this.style.display='none'"/>
-      <p class="fs-3 fw-bold">{{ result_b }}の順番でスコアに関係あるようです。</p>
+      <p class="fs-3 fw-bold">{{ result_a }}の順番でスコアに関係あるようです。</p>
   </div>
 </div>
 </html>
+
+{{check}}
+{{check_b}}
 
 {% endautoescape %}
 {% endblock %}
