@@ -18,13 +18,16 @@
 
 <div class="bg-transparent w-50 h-0 position-relative top-0 start-50 translate-middle-x text-center fw-bold text-dark">
   <body id="backimg" background="{% static 'accounts/img/golf-g69cefbbf7_1920.jpg' %}"></body>
-
+  
   <h2 class="p-2 fw-bold text-dark">新規登録</h2>
+
+  {% if AccountCreate %}
+  <h1 class = "fw-bold w-50 position-relative top-0 start-50 translate-middle-x">登録完了</h1>
+  {% else %}
+  
   <h3 class="p-1 fw-bold text-dark">会員情報</h3>
   
-  {% if AccountCreate %}
-    <h1>登録完了!</h1>
-  {% else %}
+  
 
   <form enctype="multipart/form-data" method="post">
   
@@ -62,8 +65,7 @@
 
 </div>
 <div class="position-relative top-0 start-50 translate-middle-x text-center">
-  <a class="btn btn-link m-3 fw-bold fs-3" href="{% url 'accounts:login' %}">ログイン画面へ</a>
+  <a class="btn m-3 bg-primary text-light fw-bold fs-5" href="{% url 'accounts:login' %}">ログイン画面へ</a>
 </div>
 
 </body>
-

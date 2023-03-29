@@ -28,13 +28,11 @@
         {% endfor %}
 
             <tr>
-                <th>{{player_add}}</th>
+                <th class = "fs-3 p-3"><a href="{% url 'score:person_create' %}">{{player_add}}</a></th>
             </tr>   
         
     </tbody>
 </table>
-
-{{csv_name}}
 
 <a href="{% url 'score:upload' %}" class="text-decoration-none fs-3">CSVファイルからアップロード</a>
     

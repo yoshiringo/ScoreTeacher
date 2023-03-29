@@ -237,9 +237,7 @@ class StatAnalyze(generic.DetailView):
             result = {"OB": round(cf / (OB_score+1), 1), "ペナルティ": round(cf / (pn_score+1), 1), "FWキープ": round(cf / (fk_score+1), 1), "パーオン": round(cf / (po_score+1), 1), "パット": round(cf / (patt_score+1),1), "バンカー": round(cf / (バンカー_score+1),1)}
 
             practice = sorted(result.items(), key=lambda i: i[1], reverse=True)
-            
-     
-            
+                
         result = practice[0][0],practice[1][0],practice[2][0],practice[3][0],practice[4][0],practice[5][0]
         number = practice[0][1],practice[1][1],practice[2][1],practice[3][1],practice[4][1],practice[5][1]
 
