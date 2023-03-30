@@ -603,8 +603,8 @@ class Average(generic.ListView):
 
         return context
 
-class PostImport(generic.FormView):
-    template_name = 'score/upload.html'
+class CsvImport(generic.FormView):
+    template_name = 'score/csv_import.html'
     success_url = reverse_lazy('score:person_list')
     form_class = CSVUploadForm
 
@@ -646,13 +646,13 @@ class PostImport(generic.FormView):
 
                 except:
                     messages.add_message(self.request, messages.ERROR, "内容が正しいか等確認してください")
-                    return redirect('score:upload')
+                    return redirect('score:csv_import')
         
             return super().form_valid(form)
             
         else:
             messages.add_message(self.request, messages.ERROR, "csvファイルを選択してください")
-            return redirect('score:upload')
+            return redirect('score:csv_import')
 
 def csv_export(request):
     response = HttpResponse(content_type='text/csv; charset=Shift-JIS')
@@ -662,7 +662,7 @@ def csv_export(request):
     header = ["名前","影響度",'OB', 'ペナルティ', 'FWキープ','パーオン',"パット","バンカー","stats平均","スコア","OB数","ペナルティ数","FWキープ率","パーオン率","パット数","バンカー数"]
     writer.writerow(header)
 
-    pks = list(Person.objects.values_list('id', flat=True).all())
+    pks = list(Person.objects.values_list('id', flat=True).all().order_by("sex"))
     for pk in pks:
 
         if Stat.objects.filter(player=pk).all().exists() == True:
