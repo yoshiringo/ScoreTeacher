@@ -31,7 +31,7 @@ class StatCreateForm(forms.ModelForm):
                                                   'placeholder': 'バンカー数',
                                                   'class': 'form-control'}),
             'penalty': forms.TextInput(attrs={'autocomplete': 'off',
-                                                  'placeholder': 'ペナルティ率',
+                                                  'placeholder': 'ペナルティ数',
                                                   'class': 'form-control'}),                                                                                                                                                                                                                                                                        
         }
 

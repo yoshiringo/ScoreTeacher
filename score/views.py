@@ -18,8 +18,7 @@ import numpy as np
 from django.http import HttpResponse
 import csv,urllib
 
-# Create your views here.
-
+#プレイヤー一覧ページ
 class PersonList(generic.ListView):
     model = Person
     template_name = "score/index.html"
@@ -27,19 +26,21 @@ class PersonList(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        #プレイヤー未登録の場合メッセージを表示する
         login_user_id = self.request.user.id
-        personlist = Person.objects.filter(login_user=login_user_id)
         person_user = Person.objects.values_list('login_user', flat=True).filter(login_user=login_user_id)
         if person_user.exists() == False:
             context["player_add"] = "プレイヤーを追加してください" 
 
-        persons = Paginator(personlist, 10).get_page(self.request.GET.get('p'))
+        #ページネーション
+        person_list = Person.objects.filter(login_user=login_user_id)
+        persons = Paginator(person_list, 10).get_page(self.request.GET.get('p'))
 
         context["persons"] = persons
-        context["person_user"] = person_user
 
         return context
 
+#スタッツ一覧とスタット登録ページ
 class StatCreate(generic.CreateView):
     template_name = "score/detail.html"
     ordering = ('date')
@@ -48,14 +49,19 @@ class StatCreate(generic.CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         pk = self.kwargs.get("pk")
-        context["person"] = get_object_or_404(Person, pk=pk)
-        stats = Stat.objects.filter(player=pk).order_by("date")
-        context['breadcrumbs_list'] = [{'name': 'Stats',
-                                         'url': ''}]
+        
+        #スコア未登録の場合メッセージを表示
+        stats = Stat.objects.filter(player=pk)
         stats_str = f'{stats}'
         context["check"] = any(map(str.isdigit, stats_str))
+
+        context["person"] = get_object_or_404(Person, pk=pk)
+        context['breadcrumbs_list'] = [{'name': 'Stats',
+                                         'url': ''}]
         context["stat_p"] = Paginator(stats, 10).get_page(self.request.GET.get('p'))
 
+        #Stat平均
+        #Statテーブルが空の場合はエラーになるため
         if Stat.objects.filter(player=pk).all().exists() == True:
 
             score_avg = Stat.objects.filter(player=pk).aggregate(Avg("total_score"))
@@ -100,6 +106,7 @@ class StatCreate(generic.CreateView):
 
         return reverse_lazy("score:detail", kwargs={"pk": pk})
 
+#プレイヤー登録ページ
 class PersonCreate(generic.CreateView):
     model = Person
     template_name = 'score/person_create.html'
@@ -110,7 +117,7 @@ class PersonCreate(generic.CreateView):
         context['breadcrumbs_list'] = [{'name': 'プレイヤー追加',
                                         'url': ''}]
         context["persons"]   = Person.objects.all()
-
+        #setting.pyで設定したSEXから選択
         context["sexs"] = [ p[0] for p in Person.sex.field.choices ]
 
         return context
@@ -128,6 +135,7 @@ class PersonCreate(generic.CreateView):
 
         return reverse_lazy('score:person_list')
 
+#スタッツ分析ページ
 class StatAnalyze(generic.DetailView):
     model = Person
     template_name = "score/stat_analyze.html"
@@ -142,16 +150,17 @@ class StatAnalyze(generic.DetailView):
         {'name': '分析結果','url': ''}
         ]
 
+        #Statテーブルをデータフレーム化
         df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
         df.columns = ["id", "player_id", "date", "スコア", "パット", "FWキープ", "パーオン", "OB", "バンカー", "ペナルティ", "stat_number"]
 
+        #データ数が7以下だとLinearRegressionがエラーになるでの場合分け
         if len(df) > 7:
             #全stat
             z = df.drop(['id','player_id','date','stat_number'], axis=1)
 
-            
+            #一項目が全て同じ値だとエラーになるのでその場合値を変える
             score_count = len(z)-1
-
             putt_true_count = f'{z.duplicated("パット")}'.count("True")
             if putt_true_count == score_count:
                 z.iat[1,1] = 101
@@ -178,9 +187,7 @@ class StatAnalyze(generic.DetailView):
 
             #statを標準化
             df_std = z.apply(lambda x: (x-x.mean())/x.std(), axis=0)
-            #statのスコア以外
             x = df_std.drop(['スコア'], axis=1)
-            #スコア
             y = df_std['スコア']
 
             reg = LinearRegression()
@@ -188,7 +195,6 @@ class StatAnalyze(generic.DetailView):
             coef = reg.coef_.round(4)
             n = x.shape[0]
             p = x.shape[1]
-
             y_hat = reg.predict(x)
             sse = np.sum((y - y_hat) **2, axis=0)
             sse = sse / (n - p - 1)
@@ -201,10 +207,13 @@ class StatAnalyze(generic.DetailView):
             t_col = dict(zip(col, t_values_abs))
             practice = sorted(t_col.items(), key=lambda x:x[1], reverse=True)
         
+        #データ数が7以下の場合
         else:
+            #スコア数カウント
             df_score = df.sort_values("スコア")
             data_count = df["スコア"].count()
             
+            #各ラウンドのパット数が全ラウンド中何位かと、その時のスコアが全ラウンド中何位かを出し、その差を合計。その値が小さければよりパット数がスコアに影響しているということ。
             df_patt = df.sort_values(by=["パット","スコア"])
             patt_count = [abs(df_patt.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
             patt_score = sum(patt_count)
@@ -221,36 +230,39 @@ class StatAnalyze(generic.DetailView):
             OB_count = [abs(df_OB.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
             OB_score = sum(OB_count)
 
-            df_バンカー = df.sort_values(by=["バンカー","スコア"])
-            バンカー_count = [abs(df_バンカー.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
-            バンカー_score = sum(バンカー_count)
+            df_bunker = df.sort_values(by=["バンカー","スコア"])
+            bunker_count = [abs(df_bunker.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+            bunker_score = sum(bunker_count)
             
             df_pn = df.sort_values(by=["ペナルティ","スコア"])
             pn_count = [abs(df_pn.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
             pn_score = sum(pn_count)
 
-            calc_add = 1/(OB_score+1) + 1/(pn_score+1) + 1/(fk_score+1) + 1/(po_score+1) + 1/(patt_score+1) + 1/(バンカー_score+1)
+            #影響度を%で出したいので、逆数を取り%に直す。
+            calc_add = 1/(OB_score+1) + 1/(pn_score+1) + 1/(fk_score+1) + 1/(po_score+1) + 1/(patt_score+1) + 1/(bunker_score+1)
             cf = 100 / calc_add
 
             result = {"パット": round(cf / (patt_score+1),1), 
                       "FWキープ": round(cf / (fk_score+1), 1), 
                       "パーオン": round(cf / (po_score+1), 1), 
                       "OB": round(cf / (OB_score+1), 1), 
-                      "バンカー": round(cf / (バンカー_score+1),1), 
+                      "バンカー": round(cf / (bunker_score+1),1), 
                       "ペナルティ": round(cf / (pn_score+1), 1)}
 
             practice = sorted(result.items(), key=lambda i: i[1], reverse=True)
                 
         result = practice[0][0],practice[1][0],practice[2][0],practice[3][0],practice[4][0],practice[5][0]
-        number = practice[0][1],practice[1][1],practice[2][1],practice[3][1],practice[4][1],practice[5][1]
-
         result_a = f'{result}'.translate(str.maketrans({"(": "", ")": "", "'": ""}))
+        context["result_a"] = result_a  
 
+        #円グラフ用
+        number = practice[0][1],practice[1][1],practice[2][1],practice[3][1],practice[4][1],practice[5][1]
         context["chart"] = plugin_plotly.Plot_PieChart([pie for pie in number], [label for label in result])
-        context["result_a"] = result_a        
+              
 
         return context
 
+#スタッツ削除
 class StatDelete(generic.DeleteView):
     model = Stat
     template_name = 'score/person_create.html'
@@ -258,12 +270,14 @@ class StatDelete(generic.DeleteView):
         player_pk = self.object.player.pk
         return reverse_lazy('score:detail', kwargs={'pk': player_pk})
 
+#プレイヤー削除
 class PersonDelete(generic.DeleteView):
     model = Person
 
     def get_success_url(self):
         return reverse_lazy('score:person_list')
 
+#カテゴリ別平均ページ
 class Average(generic.ListView):
     model = Stat
     template_name = "score/average.html"
@@ -610,6 +624,7 @@ class Average(generic.ListView):
 
         return context
 
+#csvインポート
 class CsvImport(generic.FormView):
     template_name = 'score/csv_import.html'
     success_url = reverse_lazy('score:person_list')
@@ -624,6 +639,8 @@ class CsvImport(generic.FormView):
         
             for line in csv_file:
                 try:
+                    #異なるログインユーザーであれば同じplayer_numberでも登録したいので、player_numberを工夫
+                    #読み込もうとしているプレイヤーが既に登録されていないかチェック
                     if f'[{self.request.user.id}]' != list(Person.objects.values_list('login_user', flat=True).filter(player_number=int(f'{self.request.user.id}'+"000000"+f'{line[1]}'))):
                         person, created = Person.objects.get_or_create(player_number=int(f'{self.request.user.id}'+"000000"+f'{line[1]}'))
                         person.login_user = self.request.user.id
@@ -636,6 +653,7 @@ class CsvImport(generic.FormView):
                     stat_number_check = f'{stat_number_check}'
                     stat_number_check = stat_number_check.replace("}", "")
                     s_check = int(f'{self.request.user.id}'+"000000"+f'{line[12]}')
+                    #読み込もうとしているスタッツが既に登録されていないかチェック
                     if f': {s_check},' not in f'{stat_number_check}' and f': {s_check}]' not in f'{stat_number_check}':
                     
                         Stat.objects.create(
@@ -652,6 +670,7 @@ class CsvImport(generic.FormView):
                         )
 
                 except:
+                    #csvの内容が間違っている場合はエラーメッセージ表示
                     messages.add_message(self.request, messages.ERROR, "内容が正しいか等確認してください")
                     return redirect('score:csv_import')
         
@@ -661,21 +680,25 @@ class CsvImport(generic.FormView):
             messages.add_message(self.request, messages.ERROR, "csvファイルを選択してください")
             return redirect('score:csv_import')
 
+#csvエクスポート
 def csv_export(request):
+    #csvファイル作成
     response = HttpResponse(content_type='text/csv; charset=Shift-JIS')
     filename = urllib.parse.quote((u'仮ファイル.csv').encode("utf8"))
     response['Content-Disposition'] = 'attachment; filename*=UTF-8\'\'{}'.format(filename)
     writer = csv.writer(response)
+    #列名
     header = ["名前", "影響度", "パット",'FWキープ','パーオン','OB',"バンカー",'ペナルティ', "stats平均","スコア","パット数","FWキープ率","パーオン率","OB数","バンカー数","ペナルティ数"]
     writer.writerow(header)
 
+    #StatAnalyzeクラスの計算式を使い回す方法が分からなかったため再度計算
     pks = list(Person.objects.values_list('id', flat=True).all().order_by("sex"))
     for pk in pks:
 
         if Stat.objects.filter(player=pk).all().exists() == True:
 
             df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
-            df.columns = ["id", "player_id", "date", "パット",'FWキープ','パーオン','OB',"バンカー",'ペナルティ',"stat_number"]
+            df.columns = ['id', 'player_id', 'date', "スコア", 'パット','FWキープ','パーオン','OB','バンカー','ペナルティ','stat_number']
 
             if len(df) > 7:
                 #全stat
@@ -783,13 +806,14 @@ def csv_export(request):
             blank = ""
             player_name = list(Person.objects.values_list("name", flat=True).filter(id=pk))
             player_name = f'{player_name}'.replace("['", "").replace("']", "")
+
             writer.writerow([player_name,blank,practice["パット"],practice["FWキープ"],practice["パーオン"],practice["OB"],practice["バンカー"],practice["ペナルティ"],blank,
                              round(score_avg["total_score__avg"],1),
                              round(putt_avg["putt__avg"],1),
                              round(fw_avg["fw__avg"],1),
                              round(par_on_avg["par_on__avg"],1),
                              round(ob_avg["ob__avg"],1),
-                             round(bunker_avg["bunker__avg"],1)],  
-                             round(penalty_avg["penalty__avg"],1))
+                             round(bunker_avg["bunker__avg"],1),  
+                             round(penalty_avg["penalty__avg"],1)])
                              
     return response
