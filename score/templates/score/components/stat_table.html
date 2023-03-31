@@ -9,12 +9,12 @@
         <tr>
             <th class="p-1 border-bottom-5 border-primary">ラウンド日</th>
             <th>スコア</th>
-            <th class="p-1 border-bottom border-primary">OB</th>
-            <th>ペナルティ</th>
-            <th class="p-1 border-bottom border-primary">FWキープ</th>
-            <th>パーオン</th>
             <th class="p-1 border-bottom border-primary">パット</th>
+            <th>FWキープ</th>
+            <th class="p-1 border-bottom border-primary">パーオン</th>
+            <th>OB</th>
             <th class="p-1 border-bottom border-primary">バンカー</th>
+            <th>ペナルティ</th>
 
             <th scope="col"></th>
         </tr>
@@ -26,12 +26,12 @@
         <tr>
             <th>{{ stat.date|date:'Y-m-d'  }}</th>
             <th>{{ stat.total_score }}</th>
-            <th>{{ stat.ob }}</th>
-            <th>{{ stat.penalty }}</th>
+            <th>{{ stat.putt }}</th>
             <th>{{ stat.fw }}%</th>
             <th>{{ stat.par_on }}%</th>
-            <th>{{ stat.putt }}</th>
+            <th>{{ stat.ob }}</th>
             <th>{{ stat.bunker }}</th>
+            <th>{{ stat.penalty }}</th>
 
             <th>
                 <button type="button" class="btn btn-rounded btn-sm btn-danger delete-modal-button"
@@ -59,12 +59,12 @@
         <tr class="fs-4">
             <th class="fw-bold">平均</th>
             <th>{{ score_avg }}</th>
-            <th>{{ ob_avg }}回</th>
-            <th>{{ penalty_avg }}回</th>
+            <th>{{ putt_avg }}</th>
             <th>{{ fw_avg }}%</th>
             <th>{{ par_on_avg }}%</th>
-            <th>{{ putt_avg }}</th>
+            <th>{{ ob_avg }}回</th>
             <th>{{ bunker_avg }}回</th>
+            <th>{{ penalty_avg }}回</th>            
         </tr>
         
         <tr>

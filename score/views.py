@@ -61,34 +61,30 @@ class StatCreate(generic.CreateView):
             score_avg = Stat.objects.filter(player=pk).aggregate(Avg("total_score"))
             score_avg = f'{score_avg}'
             context["score_avg"] = round(float(score_avg.replace("{'total_score__avg': ", "").replace("}", "")),1)
-                        
-            ob_avg = Stat.objects.filter(player=pk).aggregate(Avg("ob"))
-            ob_avg = f'{ob_avg}'
-            context["ob_avg"] = round(float(ob_avg.replace("{'ob__avg': ", "").replace("}", "")), 1)
 
-            penalty_avg = Stat.objects.filter(player=pk).aggregate(Avg("penalty"))
-            penalty_avg = f'{penalty_avg}'
-
-            context["penalty_avg"] = round(float(penalty_avg.replace("{'penalty__avg': ", "").replace("}", "")), 1)
+            putt_avg = Stat.objects.filter(player=pk).aggregate(Avg("putt"))
+            putt_avg = f'{putt_avg}'
+            context["putt_avg"] = round(float(putt_avg.replace("{'putt__avg': ", "").replace("}", "")), 1)
 
             fw_avg = Stat.objects.filter(player=pk).aggregate(Avg("fw"))
             fw_avg = f'{fw_avg}'
-
             context["fw_avg"] = round(float(fw_avg.replace("{'fw__avg': ", "").replace("}", "")), 1)
-            
+
             par_on_avg = Stat.objects.filter(player=pk).aggregate(Avg("par_on"))
             par_on_avg = f'{par_on_avg}'
             context["par_on_avg"] = round(float(par_on_avg.replace("{'par_on__avg': ", "").replace("}", "")), 1)
 
-            putt_avg = Stat.objects.filter(player=pk).aggregate(Avg("putt"))
-            putt_avg = f'{putt_avg}'
-
-            context["putt_avg"] = round(float(putt_avg.replace("{'putt__avg': ", "").replace("}", "")), 1)
+            ob_avg = Stat.objects.filter(player=pk).aggregate(Avg("ob"))
+            ob_avg = f'{ob_avg}'
+            context["ob_avg"] = round(float(ob_avg.replace("{'ob__avg': ", "").replace("}", "")), 1)
 
             bunker_avg = Stat.objects.filter(player=pk).aggregate(Avg("bunker"))
             bunker_avg = f'{bunker_avg}'
-
             context["bunker_avg"] = round(float(bunker_avg.replace("{'bunker__avg': ", "").replace("}", "")), 1)
+
+            penalty_avg = Stat.objects.filter(player=pk).aggregate(Avg("penalty"))
+            penalty_avg = f'{penalty_avg}'
+            context["penalty_avg"] = round(float(penalty_avg.replace("{'penalty__avg': ", "").replace("}", "")), 1)
 
         return context
 
@@ -147,36 +143,38 @@ class StatAnalyze(generic.DetailView):
         ]
 
         df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
-        df.columns = ["id", "player_id", "date", "スコア", "OB", "ペナルティ", "FWキープ", "パーオン", "パット", "バンカー", "stat_number"]
+        df.columns = ["id", "player_id", "date", "スコア", "パット", "FWキープ", "パーオン", "OB", "バンカー", "ペナルティ", "stat_number"]
 
         if len(df) > 7:
             #全stat
             z = df.drop(['id','player_id','date','stat_number'], axis=1)
 
-            ob_true_count = f'{z.duplicated("OB")}'.count("True")
+            
             score_count = len(z)-1
-            if ob_true_count == score_count:
-                z.iat[1,1] = 101
-
-            penalty_true_count = f'{z.duplicated("ペナルティ")}'.count("True")
-            if penalty_true_count == score_count:
-                z.iat[1,2] = 101
-
-            fw_true_count = f'{z.duplicated("FWキープ")}'.count("True")
-            if fw_true_count == score_count:
-                z.iat[1,3] = 101
-
-            par_true_count = f'{z.duplicated("パーオン")}'.count("True")
-            if par_true_count == score_count:
-                z.iat[1,4] = 101
 
             putt_true_count = f'{z.duplicated("パット")}'.count("True")
             if putt_true_count == score_count:
-                z.iat[1,5] = 101
+                z.iat[1,1] = 101
+
+            fw_true_count = f'{z.duplicated("FWキープ")}'.count("True")
+            if fw_true_count == score_count:
+                z.iat[1,2] = 101
+
+            par_true_count = f'{z.duplicated("パーオン")}'.count("True")
+            if par_true_count == score_count:
+                z.iat[1,3] = 101
+            
+            ob_true_count = f'{z.duplicated("OB")}'.count("True")
+            if ob_true_count == score_count:
+                z.iat[1,4] = 101
 
             bunker_true_count = f'{z.duplicated("バンカー")}'.count("True")
             if bunker_true_count == score_count:
-                z.iat[1,6] = 101
+                z.iat[1,5] = 101
+
+            penalty_true_count = f'{z.duplicated("ペナルティ")}'.count("True")
+            if penalty_true_count == score_count:
+                z.iat[1,6] = 101            
 
             #statを標準化
             df_std = z.apply(lambda x: (x-x.mean())/x.std(), axis=0)
@@ -199,7 +197,7 @@ class StatAnalyze(generic.DetailView):
 
             t_values = (coef / std_err).round(4)
             t_values_abs = np.abs(t_values)
-            col = ["OB", "ペナルティ", "FWキープ", "パーオン", "パット", "バンカー"]
+            col = ["パット", "FWキープ", "パーオン", "OB", "バンカー", "ペナルティ"]
             t_col = dict(zip(col, t_values_abs))
             practice = sorted(t_col.items(), key=lambda x:x[1], reverse=True)
         
@@ -222,19 +220,24 @@ class StatAnalyze(generic.DetailView):
             df_OB = df.sort_values(by=["OB","スコア"])
             OB_count = [abs(df_OB.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
             OB_score = sum(OB_count)
-            
-            df_pn = df.sort_values(by=["ペナルティ","スコア"])
-            pn_count = [abs(df_pn.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
-            pn_score = sum(pn_count)
 
             df_バンカー = df.sort_values(by=["バンカー","スコア"])
             バンカー_count = [abs(df_バンカー.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
             バンカー_score = sum(バンカー_count)
             
+            df_pn = df.sort_values(by=["ペナルティ","スコア"])
+            pn_count = [abs(df_pn.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+            pn_score = sum(pn_count)
+
             calc_add = 1/(OB_score+1) + 1/(pn_score+1) + 1/(fk_score+1) + 1/(po_score+1) + 1/(patt_score+1) + 1/(バンカー_score+1)
             cf = 100 / calc_add
 
-            result = {"OB": round(cf / (OB_score+1), 1), "ペナルティ": round(cf / (pn_score+1), 1), "FWキープ": round(cf / (fk_score+1), 1), "パーオン": round(cf / (po_score+1), 1), "パット": round(cf / (patt_score+1),1), "バンカー": round(cf / (バンカー_score+1),1)}
+            result = {"パット": round(cf / (patt_score+1),1), 
+                      "FWキープ": round(cf / (fk_score+1), 1), 
+                      "パーオン": round(cf / (po_score+1), 1), 
+                      "OB": round(cf / (OB_score+1), 1), 
+                      "バンカー": round(cf / (バンカー_score+1),1), 
+                      "ペナルティ": round(cf / (pn_score+1), 1)}
 
             practice = sorted(result.items(), key=lambda i: i[1], reverse=True)
                 
@@ -275,12 +278,12 @@ class Average(generic.ListView):
 
             #男性平均
             male_score_avgs = round(df_male[["player_id","total_score"]].groupby("player_id").mean()["total_score"].mean(), 1)
-            male_ob_avgs = round(df_male[["player_id","ob"]].groupby("player_id").mean()["ob"].mean(), 1)
-            male_penalty_avgs = round(df_male[["player_id","penalty"]].groupby("player_id").mean()["penalty"].mean(), 1)
+            male_putt_avgs = round(df_male[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
             male_fw_avgs = round(df_male[["player_id","fw"]].groupby("player_id").mean()["fw"].mean(), 1)
             male_par_on_avgs = round(df_male[["player_id","par_on"]].groupby("player_id").mean()["par_on"].mean(), 1)
-            male_putt_avgs = round(df_male[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
+            male_ob_avgs = round(df_male[["player_id","ob"]].groupby("player_id").mean()["ob"].mean(), 1)
             male_bunker_avgs = round(df_male[["player_id","bunker"]].groupby("player_id").mean()["bunker"].mean(), 1)
+            male_penalty_avgs = round(df_male[["player_id","penalty"]].groupby("player_id").mean()["penalty"].mean(), 1)
 
             #男それぞれの平均
             allmale_score_avg = df_male[["player_id","total_score","ob","penalty","fw","par_on","putt", "bunker"]].groupby("player_id").mean()
@@ -294,145 +297,147 @@ class Average(generic.ListView):
 
             #男性60平均
             male_score_60 = round(male_60.mean()["total_score"], 1)
-            male_ob_60 = round(male_60.mean()["ob"], 1)
-            male_penalty_60 = round(male_60.mean()["penalty"], 1)
+            male_putt_60 = round(male_60.mean()["putt"], 1)
             male_fw_60 = round(male_60.mean()["fw"], 1)
             male_par_on_60 = round(male_60.mean()["par_on"], 1)
-            male_putt_60 = round(male_60.mean()["putt"], 1)
+            male_ob_60 = round(male_60.mean()["ob"], 1)
             male_bunker_60 = round(male_60.mean()["bunker"], 1)
+            male_penalty_60 = round(male_60.mean()["penalty"], 1)
 
             #男性70平均
             male_score_70 = round(male_70.mean()["total_score"], 1)
-            male_ob_70 = round(male_70.mean()["ob"], 1)
-            male_penalty_70 = round(male_70.mean()["penalty"], 1)
+            male_putt_70 = round(male_70.mean()["putt"], 1)
             male_fw_70 = round(male_70.mean()["fw"], 1)
             male_par_on_70 = round(male_70.mean()["par_on"], 1)
-            male_putt_70 = round(male_70.mean()["putt"], 1)
+            male_ob_70 = round(male_70.mean()["ob"], 1)
             male_bunker_70 = round(male_70.mean()["bunker"], 1)
+            male_penalty_70 = round(male_70.mean()["penalty"], 1)
 
             #男性80平均
             male_score_80 = round(male_80.mean()["total_score"], 1)
-            male_ob_80 = round(male_80.mean()["ob"], 1)
-            male_penalty_80 = round(male_80.mean()["penalty"], 1)
+            male_putt_80 = round(male_80.mean()["putt"], 1)
             male_fw_80 = round(male_80.mean()["fw"], 1)
             male_par_on_80 = round(male_80.mean()["par_on"], 1)
-            male_putt_80 = round(male_80.mean()["putt"], 1)
+            male_ob_80 = round(male_80.mean()["ob"], 1)
             male_bunker_80 = round(male_80.mean()["bunker"], 1)
+            male_penalty_80 = round(male_80.mean()["penalty"], 1)
             
             #男性90平均
             male_score_90 = round(male_90.mean()["total_score"], 1)
-            male_ob_90 = round(male_90.mean()["ob"], 1)
-            male_penalty_90 = round(male_90.mean()["penalty"], 1)
+            male_putt_90 = round(male_90.mean()["putt"], 1)
             male_fw_90 = round(male_90.mean()["fw"], 1)
             male_par_on_90 = round(male_90.mean()["par_on"], 1)
-            male_putt_90 = round(male_90.mean()["putt"], 1)
+            male_ob_90 = round(male_90.mean()["ob"], 1)
             male_bunker_90 = round(male_90.mean()["bunker"], 1)
+            male_penalty_90 = round(male_90.mean()["penalty"], 1)
 
             #男性100平均
             male_score_100 = round(male_100.mean()["total_score"], 1)
-            male_ob_100 = round(male_100.mean()["ob"], 1)
-            male_penalty_100 = round(male_100.mean()["penalty"], 1)
+            male_putt_100 = round(male_100.mean()["putt"], 1)
             male_fw_100 = round(male_100.mean()["fw"], 1)
             male_par_on_100 = round(male_100.mean()["par_on"], 1)
-            male_putt_100 = round(male_100.mean()["putt"], 1)
+            male_ob_100 = round(male_100.mean()["ob"], 1)
             male_bunker_100 = round(male_100.mean()["bunker"], 1)
+            male_penalty_100 = round(male_100.mean()["penalty"], 1)
 
             #男性110平均
             male_score_110 = round(male_110.mean()["total_score"], 1)
-            male_ob_110 = round(male_110.mean()["ob"], 1)
-            male_penalty_110 = round(male_110.mean()["penalty"], 1)
+            male_putt_110 = round(male_110.mean()["putt"], 1)
             male_fw_110 = round(male_110.mean()["fw"], 1)
             male_par_on_110 = round(male_110.mean()["par_on"], 1)
-            male_putt_110 = round(male_110.mean()["putt"], 1)
+            male_ob_110 = round(male_110.mean()["ob"], 1)
             male_bunker_110 = round(male_110.mean()["bunker"], 1)
+            male_penalty_110 = round(male_110.mean()["penalty"], 1)
 
             #男性120平均
             male_score_120 = round(male_120.mean()["total_score"], 1)
-            male_ob_120 = round(male_120.mean()["ob"], 1)
-            male_penalty_120 = round(male_120.mean()["penalty"], 1)
+            male_putt_120 = round(male_120.mean()["putt"], 1)
             male_fw_120 = round(male_120.mean()["fw"], 1)
             male_par_on_120 = round(male_120.mean()["par_on"], 1)
-            male_putt_120 = round(male_120.mean()["putt"], 1)
+            male_ob_120 = round(male_120.mean()["ob"], 1)
             male_bunker_120 = round(male_120.mean()["bunker"], 1)
+            male_penalty_120 = round(male_120.mean()["penalty"], 1)
 
 
             #男性平均cxt
             if f'{male_score_avgs}' != "nan":
                 context["male_score_avgs"] = f'{male_score_avgs}'
-                context["male_ob_avgs"] = f'{male_ob_avgs}'+"回"
-                context["male_penalty_avgs"] = f'{male_penalty_avgs}'+"回"
+                context["male_putt_avgs"] = f'{male_putt_avgs}'
                 context["male_fw_avgs"] = f'{male_fw_avgs}'+"%"
                 context["male_par_on_avgs"] = f'{male_par_on_avgs}'+"%"
-                context["male_putt_avgs"] = f'{male_putt_avgs}'
+                context["male_ob_avgs"] = f'{male_ob_avgs}'+"回"
                 context["male_bunker_avgs"] = f'{male_bunker_avgs}'
+                context["male_penalty_avgs"] = f'{male_penalty_avgs}'+"回"
             
             #男性60平均cxtf'{}'+""
             if f'{male_score_60}' != "nan":
                 context["male_score_60"] = male_score_60
-                context["male_ob_60"] = f'{male_ob_60}'+"回"
-                context["male_penalty_60"] = f'{male_penalty_60}'+"回"
+                context["male_putt_60"] = f'{male_putt_60}'
                 context["male_fw_60"] = f'{male_fw_60}'+"%"
                 context["male_par_on_60"] = f'{male_par_on_60}'+"%"
-                context["male_putt_60"] = f'{male_putt_60}'
+                context["male_ob_60"] = f'{male_ob_60}'+"回"
                 context["male_bunker_60"] = f'{male_bunker_60}'
+                context["male_penalty_60"] = f'{male_penalty_60}'+"回"
 
             #男性70平均cxt
             if f'{male_score_70}' != "nan":
                 context["male_score_70"] = male_score_70
-                context["male_ob_70"] = f'{male_ob_70}'+"回"
-                context["male_penalty_70"] = f'{male_penalty_70}'+"回"
+                context["male_putt_70"] = f'{male_putt_70}'
                 context["male_fw_70"] = f'{male_fw_70}'+"%"
                 context["male_par_on_70"] = f'{male_par_on_70}'+"%"
-                context["male_putt_70"] = f'{male_putt_70}'
+                context["male_ob_70"] = f'{male_ob_70}'+"回"
                 context["male_bunker_70"] = f'{male_bunker_70}'
+                context["male_penalty_70"] = f'{male_penalty_70}'+"回"
 
             #男性80平均cxt
             if f'{male_score_80}' != "nan":
                 context["male_score_80"] = male_score_80
-                context["male_ob_80"] = f'{male_ob_80}'+"回"
-                context["male_penalty_80"] = f'{male_penalty_80}'+"回"
+                context["male_putt_80"] = f'{male_putt_80}'
                 context["male_fw_80"] = f'{male_fw_80}'+"%"
                 context["male_par_on_80"] = f'{male_par_on_80}'+"%"
-                context["male_putt_80"] = f'{male_putt_80}'
+                context["male_ob_80"] = f'{male_ob_80}'+"回"
                 context["male_bunker_80"] = f'{male_bunker_80}'
+                context["male_penalty_80"] = f'{male_penalty_80}'+"回"
 
             #男性90平均cxt
             if f'{male_score_90}' != "nan":
                 context["male_score_90"] = male_score_90
-                context["male_ob_90"] = f'{male_ob_90}'+"回"
-                context["male_penalty_90"] = f'{male_penalty_90}'+"回"
+                context["male_putt_90"] = f'{male_putt_90}'
                 context["male_fw_90"] = f'{male_fw_90}'+"%"
                 context["male_par_on_90"] = f'{male_par_on_90}'+"%"
-                context["male_putt_90"] = f'{male_putt_90}'
+                context["male_ob_90"] = f'{male_ob_90}'+"回"
                 context["male_bunker_90"] = f'{male_bunker_90}'
+                context["male_penalty_90"] = f'{male_penalty_90}'+"回"
                 
             #男性100平均cxt
             if f'{male_score_100}' != "nan":
                 context["male_score_100"] = male_score_100
-                context["male_ob_100"] = f'{male_ob_100}'+"回"
-                context["male_penalty_100"] = f'{male_penalty_100}'+"回"
+                context["male_putt_100"] = f'{male_putt_100}'
                 context["male_fw_100"] = f'{male_fw_100}'+"%"
                 context["male_par_on_100"] = f'{male_par_on_100}'+"%"
-                context["male_putt_100"] = f'{male_putt_100}'
+                context["male_ob_100"] = f'{male_ob_100}'+"回"
                 context["male_bunker_100"] = f'{male_bunker_100}'
+                context["male_penalty_100"] = f'{male_penalty_100}'+"回"
 
+            #男性110平均cxt
             if f'{male_score_110}' != "nan":
                 context["male_score_110"] = male_score_110
-                context["male_ob_110"] = f'{male_ob_110}'+"回"
-                context["male_penalty_110"] = f'{male_penalty_110}'+"回"
+                context["male_putt_110"] = f'{male_putt_110}'
                 context["male_fw_110"] = f'{male_fw_110}'+"%"
                 context["male_par_on_110"] = f'{male_par_on_110}'+"%"
-                context["male_putt_110"] = f'{male_putt_110}'
+                context["male_ob_110"] = f'{male_ob_110}'+"回"
                 context["male_bunker_110"] = f'{male_bunker_110}'
+                context["male_penalty_110"] = f'{male_penalty_110}'+"回"
 
+            #男性120平均cxt
             if f'{male_score_120}' != "nan":
                 context["male_score_120"] = male_score_120
-                context["male_ob_120"] = f'{male_ob_120}'+"回"
-                context["male_penalty_120"] = f'{male_penalty_120}'+"回"
+                context["male_putt_120"] = f'{male_putt_120}'
                 context["male_fw_120"] = f'{male_fw_120}'+"%"
                 context["male_par_on_120"] = f'{male_par_on_120}'+"%"
-                context["male_putt_120"] = f'{male_putt_120}'
+                context["male_ob_120"] = f'{male_ob_120}'+"回"
                 context["male_bunker_120"] = f'{male_bunker_120}'
+                context["male_penalty_120"] = f'{male_penalty_120}'+"回"
                 
         #女性↓
 
@@ -440,12 +445,12 @@ class Average(generic.ListView):
 
             #女性平均
             female_score_avgs = round(df_female[["player_id","total_score"]].groupby("player_id").mean()["total_score"].mean(), 1)
-            female_ob_avgs = round(df_female[["player_id","ob"]].groupby("player_id").mean()["ob"].mean(), 1)
-            female_penalty_avgs = round(df_female[["player_id","penalty"]].groupby("player_id").mean()["penalty"].mean(), 1)
+            female_putt_avgs = round(df_female[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
             female_fw_avgs = round(df_female[["player_id","fw"]].groupby("player_id").mean()["fw"].mean(), 1)
             female_par_on_avgs = round(df_female[["player_id","par_on"]].groupby("player_id").mean()["par_on"].mean(), 1)
-            female_putt_avgs = round(df_female[["player_id","putt"]].groupby("player_id").mean()["putt"].mean(), 1)
+            female_ob_avgs = round(df_female[["player_id","ob"]].groupby("player_id").mean()["ob"].mean(), 1)
             female_bunker_avgs = round(df_female[["player_id","bunker"]].groupby("player_id").mean()["bunker"].mean(), 1)
+            female_penalty_avgs = round(df_female[["player_id","penalty"]].groupby("player_id").mean()["penalty"].mean(), 1)
 
             #女性それぞれの平均
             allfemale_score_avg = df_female[["player_id","total_score","ob","penalty","fw","par_on","putt", "bunker"]].groupby("player_id").mean()
@@ -459,145 +464,147 @@ class Average(generic.ListView):
 
             #女性60平均
             female_score_60 = round(female_60.mean()["total_score"], 1)
-            female_ob_60 = round(female_60.mean()["ob"], 1)
-            female_penalty_60 = round(female_60.mean()["penalty"], 1)
+            female_putt_60 = round(female_60.mean()["putt"], 1)
             female_fw_60 = round(female_60.mean()["fw"], 1)
             female_par_on_60 = round(female_60.mean()["par_on"], 1)
-            female_putt_60 = round(female_60.mean()["putt"], 1)
+            female_ob_60 = round(female_60.mean()["ob"], 1)
             female_bunker_60 = round(female_60.mean()["bunker"], 1)
+            female_penalty_60 = round(female_60.mean()["penalty"], 1)
 
             #女性70平均
             female_score_70 = round(female_70.mean()["total_score"], 1)
-            female_ob_70 = round(female_70.mean()["ob"], 1)
-            female_penalty_70 = round(female_70.mean()["penalty"], 1)
+            female_putt_70 = round(female_70.mean()["putt"], 1)
             female_fw_70 = round(female_70.mean()["fw"], 1)
             female_par_on_70 = round(female_70.mean()["par_on"], 1)
-            female_putt_70 = round(female_70.mean()["putt"], 1)
+            female_ob_70 = round(female_70.mean()["ob"], 1)
             female_bunker_70 = round(female_70.mean()["bunker"], 1)
+            female_penalty_70 = round(female_70.mean()["penalty"], 1)
 
             #女性80平均
             female_score_80 = round(female_80.mean()["total_score"], 1)
-            female_ob_80 = round(female_80.mean()["ob"], 1)
-            female_penalty_80 = round(female_80.mean()["penalty"], 1)
+            female_putt_80 = round(female_80.mean()["putt"], 1)
             female_fw_80 = round(female_80.mean()["fw"], 1)
             female_par_on_80 = round(female_80.mean()["par_on"], 1)
-            female_putt_80 = round(female_80.mean()["putt"], 1)
+            female_ob_80 = round(female_80.mean()["ob"], 1)
             female_bunker_80 = round(female_80.mean()["bunker"], 1)
+            female_penalty_80 = round(female_80.mean()["penalty"], 1)
             
             #女性90平均
             female_score_90 = round(female_90.mean()["total_score"], 1)
-            female_ob_90 = round(female_90.mean()["ob"], 1)
-            female_penalty_90 = round(female_90.mean()["penalty"], 1)
+            female_putt_90 = round(female_90.mean()["putt"], 1)
             female_fw_90 = round(female_90.mean()["fw"], 1)
             female_par_on_90 = round(female_90.mean()["par_on"], 1)
-            female_putt_90 = round(female_90.mean()["putt"], 1)
+            female_ob_90 = round(female_90.mean()["ob"], 1)
             female_bunker_90 = round(female_90.mean()["bunker"], 1)
+            female_penalty_90 = round(female_90.mean()["penalty"], 1)
 
             #女性100平均
             female_score_100 = round(female_100.mean()["total_score"], 1)
-            female_ob_100 = round(female_100.mean()["ob"], 1)
-            female_penalty_100 = round(female_100.mean()["penalty"], 1)
+            female_putt_100 = round(female_100.mean()["putt"], 1)
             female_fw_100 = round(female_100.mean()["fw"], 1)
             female_par_on_100 = round(female_100.mean()["par_on"], 1)
-            female_putt_100 = round(female_100.mean()["putt"], 1)
+            female_ob_100 = round(female_100.mean()["ob"], 1)
             female_bunker_100 = round(female_100.mean()["bunker"], 1)
+            female_penalty_100 = round(female_100.mean()["penalty"], 1)
 
             #女性110平均
             female_score_110 = round(female_110.mean()["total_score"], 1)
-            female_ob_110 = round(female_110.mean()["ob"], 1)
-            female_penalty_110 = round(female_110.mean()["penalty"], 1)
+            female_putt_110 = round(female_110.mean()["putt"], 1)
             female_fw_110 = round(female_110.mean()["fw"], 1)
             female_par_on_110 = round(female_110.mean()["par_on"], 1)
-            female_putt_110 = round(female_110.mean()["putt"], 1)
+            female_ob_110 = round(female_110.mean()["ob"], 1)
             female_bunker_110 = round(female_110.mean()["bunker"], 1)
+            female_penalty_110 = round(female_110.mean()["penalty"], 1)
 
             #女性120平均
             female_score_120 = round(female_120.mean()["total_score"], 1)
-            female_ob_120 = round(female_120.mean()["ob"], 1)
-            female_penalty_120 = round(female_120.mean()["penalty"], 1)
+            female_putt_120 = round(female_120.mean()["putt"], 1)
             female_fw_120 = round(female_120.mean()["fw"], 1)
             female_par_on_120 = round(female_120.mean()["par_on"], 1)
-            female_putt_120 = round(female_120.mean()["putt"], 1)
+            female_ob_120 = round(female_120.mean()["ob"], 1)
             female_bunker_120 = round(female_120.mean()["bunker"], 1)
+            female_penalty_120 = round(female_120.mean()["penalty"], 1)
 
 
             #女性平均cxt
             if f'{female_score_avgs}' != "nan":
                 context["female_score_avgs"] = f'{female_score_avgs}'
-                context["female_ob_avgs"] = f'{female_ob_avgs}'+"回"
-                context["female_penalty_avgs"] = f'{female_penalty_avgs}'+"回"
+                context["female_putt_avgs"] = f'{female_putt_avgs}'
                 context["female_fw_avgs"] = f'{female_fw_avgs}'+"%"
                 context["female_par_on_avgs"] = f'{female_par_on_avgs}'+"%"
-                context["female_putt_avgs"] = f'{female_putt_avgs}'
+                context["female_ob_avgs"] = f'{female_ob_avgs}'+"回"
                 context["female_bunker_avgs"] = f'{female_bunker_avgs}'
+                context["female_penalty_avgs"] = f'{female_penalty_avgs}'+"回"
             
             #女性60平均cxtf'{}'+""
             if f'{female_score_60}' != "nan":
                 context["female_score_60"] = female_score_60
-                context["female_ob_60"] = f'{female_ob_60}'+"回"
-                context["female_penalty_60"] = f'{female_penalty_60}'+"回"
+                context["female_putt_60"] = f'{female_putt_60}'
                 context["female_fw_60"] = f'{female_fw_60}'+"%"
                 context["female_par_on_60"] = f'{female_par_on_60}'+"%"
-                context["female_putt_60"] = f'{female_putt_60}'
+                context["female_ob_60"] = f'{female_ob_60}'+"回"
                 context["female_bunker_60"] = f'{female_bunker_60}'
+                context["female_penalty_60"] = f'{female_penalty_60}'+"回"
 
             #女性70平均cxt
             if f'{female_score_70}' != "nan":
                 context["female_score_70"] = female_score_70
-                context["female_ob_70"] = f'{female_ob_70}'+"回"
-                context["female_penalty_70"] = f'{female_penalty_70}'+"回"
+                context["female_putt_70"] = f'{female_putt_70}'
                 context["female_fw_70"] = f'{female_fw_70}'+"%"
                 context["female_par_on_70"] = f'{female_par_on_70}'+"%"
-                context["female_putt_70"] = f'{female_putt_70}'
+                context["female_ob_70"] = f'{female_ob_70}'+"回"
                 context["female_bunker_70"] = f'{female_bunker_70}'
+                context["female_penalty_70"] = f'{female_penalty_70}'+"回"
 
             #女性80平均cxt
             if f'{female_score_80}' != "nan":
                 context["female_score_80"] = female_score_80
-                context["female_ob_80"] = f'{female_ob_80}'+"回"
-                context["female_penalty_80"] = f'{female_penalty_80}'+"回"
+                context["female_putt_80"] = f'{female_putt_80}'
                 context["female_fw_80"] = f'{female_fw_80}'+"%"
                 context["female_par_on_80"] = f'{female_par_on_80}'+"%"
-                context["female_putt_80"] = f'{female_putt_80}'
+                context["female_ob_80"] = f'{female_ob_80}'+"回"
                 context["female_bunker_80"] = f'{female_bunker_80}'
+                context["female_penalty_80"] = f'{female_penalty_80}'+"回"
 
             #女性90平均cxt
             if f'{female_score_90}' != "nan":
                 context["female_score_90"] = female_score_90
-                context["female_ob_90"] = f'{female_ob_90}'+"回"
-                context["female_penalty_90"] = f'{female_penalty_90}'+"回"
+                context["female_putt_90"] = f'{female_putt_90}'
                 context["female_fw_90"] = f'{female_fw_90}'+"%"
                 context["female_par_on_90"] = f'{female_par_on_90}'+"%"
-                context["female_putt_90"] = f'{female_putt_90}'
+                context["female_ob_90"] = f'{female_ob_90}'+"回"
                 context["female_bunker_90"] = f'{female_bunker_90}'
+                context["female_penalty_90"] = f'{female_penalty_90}'+"回"
                 
             #女性100平均cxt
             if f'{female_score_100}' != "nan":
                 context["female_score_100"] = female_score_100
-                context["female_ob_100"] = f'{female_ob_100}'+"回"
-                context["female_penalty_100"] = f'{female_penalty_100}'+"回"
+                context["female_putt_100"] = f'{female_putt_100}'
                 context["female_fw_100"] = f'{female_fw_100}'+"%"
                 context["female_par_on_100"] = f'{female_par_on_100}'+"%"
-                context["female_putt_100"] = f'{female_putt_100}'
+                context["female_ob_100"] = f'{female_ob_100}'+"回"
                 context["female_bunker_100"] = f'{female_bunker_100}'
+                context["female_penalty_100"] = f'{female_penalty_100}'+"回"
 
+            #女性110平均cxt
             if f'{female_score_110}' != "nan":
                 context["female_score_110"] = female_score_110
-                context["female_ob_110"] = f'{female_ob_110}'+"回"
-                context["female_penalty_110"] = f'{female_penalty_110}'+"回"
+                context["female_putt_110"] = f'{female_putt_110}'
                 context["female_fw_110"] = f'{female_fw_110}'+"%"
                 context["female_par_on_110"] = f'{female_par_on_110}'+"%"
-                context["female_putt_110"] = f'{female_putt_110}'
+                context["female_ob_110"] = f'{female_ob_110}'+"回"
                 context["female_bunker_110"] = f'{female_bunker_110}'
+                context["female_penalty_110"] = f'{female_penalty_110}'+"回"
 
+            #女性120平均cxt
             if f'{female_score_120}' != "nan":
                 context["female_score_120"] = female_score_120
-                context["female_ob_120"] = f'{female_ob_120}'+"回"
-                context["female_penalty_120"] = f'{female_penalty_120}'+"回"
+                context["female_putt_120"] = f'{female_putt_120}'
                 context["female_fw_120"] = f'{female_fw_120}'+"%"
                 context["female_par_on_120"] = f'{female_par_on_120}'+"%"
-                context["female_putt_120"] = f'{female_putt_120}'
+                context["female_ob_120"] = f'{female_ob_120}'+"回"
                 context["female_bunker_120"] = f'{female_bunker_120}'
+                context["female_penalty_120"] = f'{female_penalty_120}'+"回"
 
 
 
@@ -636,12 +643,12 @@ class CsvImport(generic.FormView):
                             stat_number = int(f'{self.request.user.id}'+"000000"+f'{line[12]}'),
                             date = line[4],
                             total_score = line[5],
-                            ob = line[6],
-                            penalty = line[7],
-                            fw = line[8],
-                            par_on = line[9],
-                            putt = line[10],
-                            bunker = line[11]
+                            putt = line[6],
+                            fw = line[7],
+                            par_on = line[8],
+                            ob = line[9],
+                            bunker = line[10],
+                            penalty = line[11]
                         )
 
                 except:
@@ -659,7 +666,7 @@ def csv_export(request):
     filename = urllib.parse.quote((u'仮ファイル.csv').encode("utf8"))
     response['Content-Disposition'] = 'attachment; filename*=UTF-8\'\'{}'.format(filename)
     writer = csv.writer(response)
-    header = ["名前","影響度",'OB', 'ペナルティ', 'FWキープ','パーオン',"パット","バンカー","stats平均","スコア","OB数","ペナルティ数","FWキープ率","パーオン率","パット数","バンカー数"]
+    header = ["名前", "影響度", "パット",'FWキープ','パーオン','OB',"バンカー",'ペナルティ', "stats平均","スコア","パット数","FWキープ率","パーオン率","OB数","バンカー数","ペナルティ数"]
     writer.writerow(header)
 
     pks = list(Person.objects.values_list('id', flat=True).all().order_by("sex"))
@@ -668,36 +675,36 @@ def csv_export(request):
         if Stat.objects.filter(player=pk).all().exists() == True:
 
             df = pd.DataFrame(Stat.objects.filter(player_id=pk).values())
-            df.columns = ["id", "player_id", "date", "スコア", "OB", "ペナルティ", "FWキープ", "パーオン", "パット", "バンカー", "stat_number"]
+            df.columns = ["id", "player_id", "date", "パット",'FWキープ','パーオン','OB',"バンカー",'ペナルティ',"stat_number"]
 
             if len(df) > 7:
                 #全stat
                 z = df.drop(['id','player_id','date','stat_number'], axis=1)
 
-                ob_true_count = f'{z.duplicated("OB")}'.count("True")
                 score_count = len(z)-1
-                if ob_true_count == score_count:
+                putt_true_count = f'{z.duplicated("パット")}'.count("True")
+                if putt_true_count == score_count:
                     z.iat[1,1] = 101
-
-                penalty_true_count = f'{z.duplicated("ペナルティ")}'.count("True")
-                if penalty_true_count == score_count:
-                    z.iat[1,2] = 101
 
                 fw_true_count = f'{z.duplicated("FWキープ")}'.count("True")
                 if fw_true_count == score_count:
-                    z.iat[1,3] = 101
+                    z.iat[1,2] = 101
 
                 par_true_count = f'{z.duplicated("パーオン")}'.count("True")
                 if par_true_count == score_count:
+                    z.iat[1,3] = 101
+                
+                ob_true_count = f'{z.duplicated("OB")}'.count("True")
+                if ob_true_count == score_count:
                     z.iat[1,4] = 101
-
-                putt_true_count = f'{z.duplicated("パット")}'.count("True")
-                if putt_true_count == score_count:
-                    z.iat[1,5] = 101
 
                 bunker_true_count = f'{z.duplicated("バンカー")}'.count("True")
                 if bunker_true_count == score_count:
-                    z.iat[1,6] = 101
+                    z.iat[1,5] = 101
+
+                penalty_true_count = f'{z.duplicated("ペナルティ")}'.count("True")
+                if penalty_true_count == score_count:
+                    z.iat[1,6] = 101            
 
                 #statを標準化
                 df_std = z.apply(lambda x: (x-x.mean())/x.std(), axis=0)
@@ -724,7 +731,7 @@ def csv_export(request):
                 x = 100 / t_add
                 t_values_abs = (x * t_values_abs).round(1)
                 
-                col = ["OB", "ペナルティ", "FWキープ", "パーオン", "パット", "バンカー"]
+                col = ["パット",'FWキープ','パーオン','OB',"バンカー",'ペナルティ',]
                 practice = dict(zip(col, t_values_abs))
             
             else:
@@ -746,49 +753,43 @@ def csv_export(request):
                 df_OB = df.sort_values(by=["OB","スコア"])
                 OB_count = [abs(df_OB.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
                 OB_score = sum(OB_count)
-                
-                df_pn = df.sort_values(by=["ペナルティ","スコア"])
-                pn_count = [abs(df_pn.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
-                pn_score = sum(pn_count)
 
                 df_バンカー = df.sort_values(by=["バンカー","スコア"])
                 バンカー_count = [abs(df_バンカー.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
                 バンカー_score = sum(バンカー_count)
                 
+                df_pn = df.sort_values(by=["ペナルティ","スコア"])
+                pn_count = [abs(df_pn.index.get_loc(i) - df_score.index.get_loc(i)) for i in range(data_count)]
+                pn_score = sum(pn_count)               
+                
                 calc_add = 1/(OB_score+1) + 1/(pn_score+1) + 1/(fk_score+1) + 1/(po_score+1) + 1/(patt_score+1) + 1/(バンカー_score+1)
                 cf = 100 / calc_add
 
-                practice = {"OB": round(cf / (OB_score+1), 1),
-                            "ペナルティ": round(cf / (pn_score+1), 1),
+                practice = {"パット": round(cf / (patt_score+1),1),
                             "FWキープ": round(cf / (fk_score+1), 1),
                             "パーオン": round(cf / (po_score+1), 1),
-                            "パット": round(cf / (patt_score+1),1),
-                            "バンカー": round(cf / (バンカー_score+1),1)}
-
+                            "OB": round(cf / (OB_score+1), 1),
+                            "バンカー": round(cf / (バンカー_score+1),1),
+                            "ペナルティ": round(cf / (pn_score+1), 1)}
+                            
             score_avg = Stat.objects.filter(player=pk).aggregate(Avg("total_score"))
-                        
+            putt_avg = Stat.objects.filter(player=pk).aggregate(Avg("putt"))  
+            fw_avg = Stat.objects.filter(player=pk).aggregate(Avg("fw"))      
+            par_on_avg = Stat.objects.filter(player=pk).aggregate(Avg("par_on"))    
             ob_avg = Stat.objects.filter(player=pk).aggregate(Avg("ob"))
-
-            penalty_avg = Stat.objects.filter(player=pk).aggregate(Avg("penalty"))
-
-            fw_avg = Stat.objects.filter(player=pk).aggregate(Avg("fw"))
-            
-            par_on_avg = Stat.objects.filter(player=pk).aggregate(Avg("par_on"))
-
-            putt_avg = Stat.objects.filter(player=pk).aggregate(Avg("putt"))
-
             bunker_avg = Stat.objects.filter(player=pk).aggregate(Avg("bunker"))
+            penalty_avg = Stat.objects.filter(player=pk).aggregate(Avg("penalty"))
 
             blank = ""
             player_name = list(Person.objects.values_list("name", flat=True).filter(id=pk))
             player_name = f'{player_name}'.replace("['", "").replace("']", "")
-            writer.writerow([player_name,blank,practice["OB"],practice["ペナルティ"],practice["FWキープ"],practice["パーオン"],practice["パット"],practice["バンカー"],blank,
+            writer.writerow([player_name,blank,practice["パット"],practice["FWキープ"],practice["パーオン"],practice["OB"],practice["バンカー"],practice["ペナルティ"],blank,
                              round(score_avg["total_score__avg"],1),
-                             round(ob_avg["ob__avg"],1),
-                             round(penalty_avg["penalty__avg"],1),
+                             round(putt_avg["putt__avg"],1),
                              round(fw_avg["fw__avg"],1),
                              round(par_on_avg["par_on__avg"],1),
-                             round(putt_avg["putt__avg"],1),
-                             round(bunker_avg["bunker__avg"],1)])         
-    
+                             round(ob_avg["ob__avg"],1),
+                             round(bunker_avg["bunker__avg"],1)],  
+                             round(penalty_avg["penalty__avg"],1))
+                             
     return response
