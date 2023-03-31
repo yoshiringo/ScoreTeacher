@@ -63,6 +63,17 @@
   </form>
   {% endif %}
 
+  {% if error_message %}
+  <div class="alert alert-danger w-50 position-relative top-0 start-50 translate-middle-x text-center">
+      {% for field, errors in error_message.items %}
+          {% for error in errors %}
+              {{ error }}
+          {% endfor %}
+          <br>
+      {% endfor %}
+  </div>
+  {% endif %}
+
 </div>
 <div class="position-relative top-0 start-50 translate-middle-x text-center">
   <a class="btn m-3 bg-primary text-light fw-bold fs-5" href="{% url 'accounts:login' %}">ログイン画面へ</a>

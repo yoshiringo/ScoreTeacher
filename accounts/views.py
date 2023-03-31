@@ -36,13 +36,12 @@ class  AccountRegistration(TemplateView):
             # ハッシュ化パスワード更新
             account.save()
 
-
             # アカウント作成情報更新
             self.params["AccountCreate"] = True
 
         else:
-            messages.add_message(request, messages.ERROR, "ユーザーIDかパスワードが間違っています")
-            return redirect('accounts:login')        
+            self.params['error_message'] = self.params['account_form'].errors
+            return render(request, 'accounts/register.html', context=self.params) 
 
         return render(request,"accounts/register.html",context=self.params)
 
