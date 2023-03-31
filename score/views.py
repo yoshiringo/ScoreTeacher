@@ -380,7 +380,7 @@ class Average(generic.ListView):
                 context["male_fw_avgs"] = f'{male_fw_avgs}'+"%"
                 context["male_par_on_avgs"] = f'{male_par_on_avgs}'+"%"
                 context["male_ob_avgs"] = f'{male_ob_avgs}'+"回"
-                context["male_bunker_avgs"] = f'{male_bunker_avgs}'
+                context["male_bunker_avgs"] = f'{male_bunker_avgs}'+"回"
                 context["male_penalty_avgs"] = f'{male_penalty_avgs}'+"回"
             
             #男性60平均cxtf'{}'+""
@@ -390,7 +390,7 @@ class Average(generic.ListView):
                 context["male_fw_60"] = f'{male_fw_60}'+"%"
                 context["male_par_on_60"] = f'{male_par_on_60}'+"%"
                 context["male_ob_60"] = f'{male_ob_60}'+"回"
-                context["male_bunker_60"] = f'{male_bunker_60}'
+                context["male_bunker_60"] = f'{male_bunker_60}'+"回"
                 context["male_penalty_60"] = f'{male_penalty_60}'+"回"
 
             #男性70平均cxt
@@ -400,7 +400,7 @@ class Average(generic.ListView):
                 context["male_fw_70"] = f'{male_fw_70}'+"%"
                 context["male_par_on_70"] = f'{male_par_on_70}'+"%"
                 context["male_ob_70"] = f'{male_ob_70}'+"回"
-                context["male_bunker_70"] = f'{male_bunker_70}'
+                context["male_bunker_70"] = f'{male_bunker_70}'+"回"
                 context["male_penalty_70"] = f'{male_penalty_70}'+"回"
 
             #男性80平均cxt
@@ -410,7 +410,7 @@ class Average(generic.ListView):
                 context["male_fw_80"] = f'{male_fw_80}'+"%"
                 context["male_par_on_80"] = f'{male_par_on_80}'+"%"
                 context["male_ob_80"] = f'{male_ob_80}'+"回"
-                context["male_bunker_80"] = f'{male_bunker_80}'
+                context["male_bunker_80"] = f'{male_bunker_80}'+"回"
                 context["male_penalty_80"] = f'{male_penalty_80}'+"回"
 
             #男性90平均cxt
@@ -420,7 +420,7 @@ class Average(generic.ListView):
                 context["male_fw_90"] = f'{male_fw_90}'+"%"
                 context["male_par_on_90"] = f'{male_par_on_90}'+"%"
                 context["male_ob_90"] = f'{male_ob_90}'+"回"
-                context["male_bunker_90"] = f'{male_bunker_90}'
+                context["male_bunker_90"] = f'{male_bunker_90}'+"回"
                 context["male_penalty_90"] = f'{male_penalty_90}'+"回"
                 
             #男性100平均cxt
@@ -430,7 +430,7 @@ class Average(generic.ListView):
                 context["male_fw_100"] = f'{male_fw_100}'+"%"
                 context["male_par_on_100"] = f'{male_par_on_100}'+"%"
                 context["male_ob_100"] = f'{male_ob_100}'+"回"
-                context["male_bunker_100"] = f'{male_bunker_100}'
+                context["male_bunker_100"] = f'{male_bunker_100}'+"回"
                 context["male_penalty_100"] = f'{male_penalty_100}'+"回"
 
             #男性110平均cxt
@@ -440,7 +440,7 @@ class Average(generic.ListView):
                 context["male_fw_110"] = f'{male_fw_110}'+"%"
                 context["male_par_on_110"] = f'{male_par_on_110}'+"%"
                 context["male_ob_110"] = f'{male_ob_110}'+"回"
-                context["male_bunker_110"] = f'{male_bunker_110}'
+                context["male_bunker_110"] = f'{male_bunker_110}'+"回"
                 context["male_penalty_110"] = f'{male_penalty_110}'+"回"
 
             #男性120平均cxt
@@ -450,7 +450,7 @@ class Average(generic.ListView):
                 context["male_fw_120"] = f'{male_fw_120}'+"%"
                 context["male_par_on_120"] = f'{male_par_on_120}'+"%"
                 context["male_ob_120"] = f'{male_ob_120}'+"回"
-                context["male_bunker_120"] = f'{male_bunker_120}'
+                context["male_bunker_120"] = f'{male_bunker_120}'+"回"
                 context["male_penalty_120"] = f'{male_penalty_120}'+"回"
                 
         #女性↓
@@ -547,7 +547,7 @@ class Average(generic.ListView):
                 context["female_fw_avgs"] = f'{female_fw_avgs}'+"%"
                 context["female_par_on_avgs"] = f'{female_par_on_avgs}'+"%"
                 context["female_ob_avgs"] = f'{female_ob_avgs}'+"回"
-                context["female_bunker_avgs"] = f'{female_bunker_avgs}'
+                context["female_bunker_avgs"] = f'{female_bunker_avgs}'+"回"
                 context["female_penalty_avgs"] = f'{female_penalty_avgs}'+"回"
             
             #女性60平均cxtf'{}'+""
@@ -557,7 +557,7 @@ class Average(generic.ListView):
                 context["female_fw_60"] = f'{female_fw_60}'+"%"
                 context["female_par_on_60"] = f'{female_par_on_60}'+"%"
                 context["female_ob_60"] = f'{female_ob_60}'+"回"
-                context["female_bunker_60"] = f'{female_bunker_60}'
+                context["female_bunker_60"] = f'{female_bunker_60}'+"回"
                 context["female_penalty_60"] = f'{female_penalty_60}'+"回"
 
             #女性70平均cxt
@@ -567,7 +567,7 @@ class Average(generic.ListView):
                 context["female_fw_70"] = f'{female_fw_70}'+"%"
                 context["female_par_on_70"] = f'{female_par_on_70}'+"%"
                 context["female_ob_70"] = f'{female_ob_70}'+"回"
-                context["female_bunker_70"] = f'{female_bunker_70}'
+                context["female_bunker_70"] = f'{female_bunker_70}'+"回"
                 context["female_penalty_70"] = f'{female_penalty_70}'+"回"
 
             #女性80平均cxt
@@ -577,7 +577,7 @@ class Average(generic.ListView):
                 context["female_fw_80"] = f'{female_fw_80}'+"%"
                 context["female_par_on_80"] = f'{female_par_on_80}'+"%"
                 context["female_ob_80"] = f'{female_ob_80}'+"回"
-                context["female_bunker_80"] = f'{female_bunker_80}'
+                context["female_bunker_80"] = f'{female_bunker_80}'+"回"
                 context["female_penalty_80"] = f'{female_penalty_80}'+"回"
 
             #女性90平均cxt
@@ -587,7 +587,7 @@ class Average(generic.ListView):
                 context["female_fw_90"] = f'{female_fw_90}'+"%"
                 context["female_par_on_90"] = f'{female_par_on_90}'+"%"
                 context["female_ob_90"] = f'{female_ob_90}'+"回"
-                context["female_bunker_90"] = f'{female_bunker_90}'
+                context["female_bunker_90"] = f'{female_bunker_90}'+"回"
                 context["female_penalty_90"] = f'{female_penalty_90}'+"回"
                 
             #女性100平均cxt
@@ -597,7 +597,7 @@ class Average(generic.ListView):
                 context["female_fw_100"] = f'{female_fw_100}'+"%"
                 context["female_par_on_100"] = f'{female_par_on_100}'+"%"
                 context["female_ob_100"] = f'{female_ob_100}'+"回"
-                context["female_bunker_100"] = f'{female_bunker_100}'
+                context["female_bunker_100"] = f'{female_bunker_100}'+"回"
                 context["female_penalty_100"] = f'{female_penalty_100}'+"回"
 
             #女性110平均cxt
@@ -607,7 +607,7 @@ class Average(generic.ListView):
                 context["female_fw_110"] = f'{female_fw_110}'+"%"
                 context["female_par_on_110"] = f'{female_par_on_110}'+"%"
                 context["female_ob_110"] = f'{female_ob_110}'+"回"
-                context["female_bunker_110"] = f'{female_bunker_110}'
+                context["female_bunker_110"] = f'{female_bunker_110}'+"回"
                 context["female_penalty_110"] = f'{female_penalty_110}'+"回"
 
             #女性120平均cxt
@@ -617,7 +617,7 @@ class Average(generic.ListView):
                 context["female_fw_120"] = f'{female_fw_120}'+"%"
                 context["female_par_on_120"] = f'{female_par_on_120}'+"%"
                 context["female_ob_120"] = f'{female_ob_120}'+"回"
-                context["female_bunker_120"] = f'{female_bunker_120}'
+                context["female_bunker_120"] = f'{female_bunker_120}'+"回"
                 context["female_penalty_120"] = f'{female_penalty_120}'+"回"
 
 
@@ -671,7 +671,7 @@ class CsvImport(generic.FormView):
 
                 except:
                     #csvの内容が間違っている場合はエラーメッセージ表示
-                    messages.add_message(self.request, messages.ERROR, "内容が正しいか等確認してください")
+                    messages.add_message(self.request, messages.ERROR, "内容が正しいか確認して下さい")
                     return redirect('score:csv_import')
         
             return super().form_valid(form)
