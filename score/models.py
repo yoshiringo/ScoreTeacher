@@ -20,8 +20,8 @@ class Person(models.Model):
     name = models.CharField(max_length=32)
     login_user = models.IntegerField(null=True)
     sex = models.CharField(verbose_name="性別", choices=settings.SEX, max_length=2)
-    age = models.IntegerField(null=True)
-    player_number = models.IntegerField(null=True)
+    age = models.IntegerField(null=True,blank=True)
+    player_number = models.IntegerField(null=True,blank=True)
     
 class Stat(models.Model):
     player = models.ForeignKey(to=Person, verbose_name='プレイヤー', on_delete=models.CASCADE)

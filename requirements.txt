@@ -14,5 +14,5 @@ bulma
 django-widget-tweaks
 scikit-learn
 statsmodels
-base_analytics
-evaluation_analytics
+pytest-django
+mixer[django]
