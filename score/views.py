@@ -40,6 +40,35 @@ class PersonList(generic.ListView):
 
         return context
 
+#プレイヤー登録ページ
+class PersonCreate(generic.CreateView):
+    model = Person
+    template_name = 'score/person_create.html'
+    form_class = PersonCreateForm
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['breadcrumbs_list'] = [{'name': 'プレイヤー追加',
+                                        'url': ''}]
+        context["persons"]   = Person.objects.all()
+        #setting.pyで設定したSEXから選択
+        context["sexs"] = [ p[0] for p in Person.sex.field.choices ]
+
+        return context
+
+    def form_valid(self, form):
+        post = form.save(commit=False)
+        post.login_user = self.request.user.id
+        post.save()
+
+        return super().form_valid(form)
+    
+
+    def get_success_url(self):
+        pk = self.request.user.id
+
+        return reverse_lazy('score:person_list')
+    
 #スタッツ一覧とスタット登録ページ
 class StatCreate(generic.CreateView):
     template_name = "score/detail.html"
@@ -105,35 +134,6 @@ class StatCreate(generic.CreateView):
         pk = self.kwargs.get("pk")
 
         return reverse_lazy("score:detail", kwargs={"pk": pk})
-
-#プレイヤー登録ページ
-class PersonCreate(generic.CreateView):
-    model = Person
-    template_name = 'score/person_create.html'
-    form_class = PersonCreateForm
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['breadcrumbs_list'] = [{'name': 'プレイヤー追加',
-                                        'url': ''}]
-        context["persons"]   = Person.objects.all()
-        #setting.pyで設定したSEXから選択
-        context["sexs"] = [ p[0] for p in Person.sex.field.choices ]
-
-        return context
-
-    def form_valid(self, form):
-        post = form.save(commit=False)
-        post.login_user = self.request.user.id
-        post.save()
-
-        return super().form_valid(form)
-    
-
-    def get_success_url(self):
-        pk = self.request.user.id
-
-        return reverse_lazy('score:person_list')
 
 #スタッツ分析ページ
 class StatAnalyze(generic.DetailView):
@@ -690,9 +690,10 @@ def csv_export(request):
     #列名
     header = ["名前", "影響度", "パット",'FWキープ','パーオン','OB',"バンカー",'ペナルティ', "stats平均","スコア","パット数","FWキープ率","パーオン率","OB数","バンカー数","ペナルティ数"]
     writer.writerow(header)
+    login_user_id = request.user.id
 
     #StatAnalyzeクラスの計算式を使い回す方法が分からなかったため再度計算
-    pks = list(Person.objects.values_list('id', flat=True).all().order_by("sex"))
+    pks = list(Person.objects.values_list('id', flat=True).filter(login_user=login_user_id).order_by("sex"))
     for pk in pks:
 
         if Stat.objects.filter(player=pk).all().exists() == True:
