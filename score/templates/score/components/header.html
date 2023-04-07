@@ -24,6 +24,19 @@
               プレイヤー追加
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'score:csv_import' %}">
+              <i class="fa fa-plus"></i>
+              csvファイルから読み込む
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'score:csv_export' %}">
+              csv出力
+              <i class="fas fa-arrow-alt-circle-down"></i>
+            </a>
+          </li>
+          
           {% if user.is_authenticated %}
           <li>
             <a class="nav-link">ユーザー名:{{ user.get_username }}さん</a>

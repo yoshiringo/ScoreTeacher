@@ -1,6 +1,7 @@
 {% load django_bootstrap5 %}
 {% load static %}
 
+<div>
 <table>
     {% bootstrap_css %}
     {% bootstrap_javascript %}
@@ -33,8 +34,6 @@
         
     </tbody>
 </table>
-
-<a href="{% url 'score:csv_import' %}" class="text-decoration-none fs-3">CSVファイルからアップロード</a>
     
 <nav class="p-3" aria-label="Page navigation example">
     {% bootstrap_css %}
@@ -61,3 +60,4 @@
         {% endif %}
     </ul>
 </nav>
+</div>
