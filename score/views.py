@@ -67,7 +67,7 @@ class PersonCreate(generic.CreateView):
     def get_success_url(self):
         pk = self.request.user.id
 
-        return reverse_lazy('score:person_list')
+        return reverse_lazy("score:detail", kwargs={"pk": pk})
     
 #スタッツ一覧とスタット登録ページ
 class StatCreate(generic.CreateView):
@@ -684,7 +684,7 @@ class CsvImport(generic.FormView):
 def csv_export(request):
     #csvファイル作成
     response = HttpResponse(content_type='text/csv; charset=Shift-JIS')
-    filename = urllib.parse.quote((u'仮ファイル.csv').encode("utf8"))
+    filename = urllib.parse.quote((u'stats_analyze.csv').encode("utf8"))
     response['Content-Disposition'] = 'attachment; filename*=UTF-8\'\'{}'.format(filename)
     writer = csv.writer(response)
     #列名
@@ -817,4 +817,14 @@ def csv_export(request):
                              round(bunker_avg["bunker__avg"],1),  
                              round(penalty_avg["penalty__avg"],1)])
                              
+    return response
+
+def csv_format(request):
+    response = HttpResponse(content_type='text/csv; charset=Shift-JIS')
+    filename = urllib.parse.quote((u'score_teacher_csvフォーマット.csv').encode("utf8"))
+    response['Content-Disposition'] = 'attachment; filename*=UTF-8\'\'{}'.format(filename)
+    writer = csv.writer(response)
+    header = ["プレイヤー名","プレイヤーナンバー一人一つの番号をつけて下さい（重複不可）","年齢","性別","ラウンド日（下記の形式で入力）","スコア","パット数","フェアウェイキープ率","パーオン率","OB数","バンカー数","ペナルティ数","ラウンドナンバー一ラウンド一つの番号をつけて下さい（重複不可）"]
+    writer.writerow(header)
+
     return response

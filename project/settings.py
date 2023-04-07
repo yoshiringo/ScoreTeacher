@@ -160,10 +160,6 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-BOOTSTRAP4 = {
-    'include_jquery': True,
-}
-
 LOGIN_URL = '/accounts' 
 LOGIN_REDIRECT_URL = '/score/'
 LOGOUT_REDIRECT_URL='/accounts/login'

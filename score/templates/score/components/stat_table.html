@@ -1,7 +1,8 @@
+{% load static %}
 {% load django_bootstrap5 %}
 {% load humanize %}
 
-<table class="table fs-5">
+<table class="table fs-5 bg-light">
     
     <thead>
         {% bootstrap_css %}
@@ -71,10 +72,14 @@
             <th><a href="{% url 'score:stat_analyze' person.pk %}">分析結果を表示する</a></th>
         </tr>
         {% endif %}
+
+        
         
     </tbody>
     
 </table>
+
+
 
 <nav aria-label="Page navigation example">
     {% bootstrap_css %}
@@ -100,4 +105,10 @@
             {% endif %}
         {% endif %}
     </ul>
+</nav>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light w-25">
+    <div class="container-fluid">
+      <h4 class="fw-bold">スコア入力欄</h4><h4>&#9660;</h4>
+    </div>
 </nav>

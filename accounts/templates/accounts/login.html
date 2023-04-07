@@ -34,7 +34,7 @@
                      </tr>
                      </table>
             
-                     <input type="submit" class="btn m-3 bg-danger text-light" value="login">
+                     <input type="submit" class="btn m-3 fs-5 bg-danger text-light" value="login">
                      {% for message in messages %}
                      <p {% if message.tags %}class="{{ message.tags }} w-75 position-relative top-0 start-50 translate-middle-x"{% endif %}>
                            {{ message }}
@@ -46,7 +46,7 @@
             
             <div class="p-2 border-top border-5 border-success w-50 h-0 position-relative start-50 translate-middle-x text-center property mt-5">
                <p class="m-3 fs-2 fw-bold text-dark">初めての方はこちら</p>
-               <a class="btn m-3 bg-danger text-light fw-bold" href="{% url 'accounts:register' %}">アカウントを作成</a>
+               <a class="btn m-3 bg-danger fs-4 text-light fw-bold" href="{% url 'accounts:register' %}">アカウントを作成</a>
             </div>
          </div>
    </div>

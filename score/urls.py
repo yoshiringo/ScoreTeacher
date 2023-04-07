@@ -13,4 +13,5 @@ urlpatterns = [
     path("average/", views.Average.as_view(), name="average"),
     path('csv_import/', views.CsvImport.as_view(), name='csv_import'),
     path('export/', views.csv_export, name='csv_export'),
+    path('csv_format/', views.csv_format, name='csv_format'),
 ]
