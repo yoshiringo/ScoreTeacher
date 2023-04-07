@@ -14,14 +14,6 @@
   <button type="submit">送信</button>
 </form>
 
-<div class="switchdsp mt-5">
-  <label for="l-1">
-    <span class="clicktxt">csvへの入力方法</span>
-  </label>
-  <input type="checkbox" id="l-1">
-  <div class="dsp">
-    <img src="{% static 'score/img/csv入力例2.jpeg' %}"  width="100%">
-  </div>
-</div>
+{% include "score/components/csv_format.html" %}
 
 {% endblock %}

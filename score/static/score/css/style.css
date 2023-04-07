@@ -24,11 +24,15 @@
     }
 
 .arrow-right {
-        display: inline-block;
-        width: 18px;
-        height: 18px;
-        margin: 0 10px;
-        border-top: 4px solid #000;
-        border-right: 4px solid #000;
-        transform: rotate(45deg);
-      }
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin: 0 10px;
+    border-top: 4px solid #000;
+    border-right: 4px solid #000;
+    transform: rotate(45deg);
+    }
+
+#stat {
+    width: 200px;
+}

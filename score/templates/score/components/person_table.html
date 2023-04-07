@@ -13,7 +13,7 @@
         
         {% for t in persons %}
             <tr class="border-bottom border-secondary">
-                <th class="p-2"><a href="{% url 'score:detail' t.pk %}" class="text-decoration-none fs-3">{{ t.name }}</a></th>
+                <th class="p-2"><a href="{% url 'score:detail' t.pk %}" class="text-decoration-none fs-3">{{ t.name }}&nbsp;&nbsp;<i class="fas fa-angle-right"></i></a></th>
                 <th class="w-50"></th>
                 <th>
                     <button type="button" class="btn btn-rounded btn-sm btn-danger delete-modal-button"
