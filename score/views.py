@@ -258,7 +258,6 @@ class StatAnalyze(generic.DetailView):
         #円グラフ用
         number = practice[0][1],practice[1][1],practice[2][1],practice[3][1],practice[4][1],practice[5][1]
         context["chart"] = plugin_plotly.Plot_PieChart([pie for pie in number], [label for label in result])
-              
 
         return context
 

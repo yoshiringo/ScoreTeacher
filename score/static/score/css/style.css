@@ -33,6 +33,27 @@
     transform: rotate(45deg);
     }
 
-#stat {
+.width200 {
     width: 200px;
 }
+
+.left {
+    float:left;
+}
+
+.width150 {
+    width: 150px;
+}
+
+.width120 {
+    width: 120px;
+}
+
+.br_::after {
+    content: "\A";
+    white-space: pre;
+  }
+
+.clear{
+    clear: both;
+    }

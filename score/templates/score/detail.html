@@ -1,6 +1,8 @@
 {% extends "score/base.html" %}
+{% load static %}
 {% load django_bootstrap5 %}
 {% block content %}
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
     <h4 class="navbar-brand">Player: {{ person.name }}</h4>
@@ -11,11 +13,9 @@
 
 {% include "score/components/stat_table.html" %}
 {% include "score/components/stat_delete_modal.html" %}
+{% include "score/components/stat_register.html" %}
 
-<form method="POST"> {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary fw-bold">スコアを登録する</button>
-</form>
+
 {% endblock %}
 
 {% block extrajs %}
