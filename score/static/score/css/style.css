@@ -49,6 +49,10 @@
     width: 120px;
 }
 
+.width100 {
+    width: 50px;
+}
+
 .br_::after {
     content: "\A";
     white-space: pre;

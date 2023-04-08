@@ -67,7 +67,7 @@ class PersonCreate(generic.CreateView):
     def get_success_url(self):
         pk = self.request.user.id
 
-        return reverse_lazy("score:detail", kwargs={"pk": pk})
+        return reverse_lazy("score:person_list")
     
 #スタッツ一覧とスタット登録ページ
 class StatCreate(generic.CreateView):
