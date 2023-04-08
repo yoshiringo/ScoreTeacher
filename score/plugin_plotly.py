@@ -17,9 +17,9 @@ def Plot_PieChart(p,l):
     plt.rcParams['font.family'] = 'Hiragino Maru Gothic Pro'
     c = ["cyan", 'tomato', 'gold', 'lawngreen',"hotpink", "lavenderblush"]
     plt.switch_backend("AGG")
-    plt.figure(figsize=(7,7))
-    plt.pie(p, autopct="%d%%", labels = l, colors = c, counterclock=False, startangle=90, radius=1.2, center=(0, 0), pctdistance=0.7)
-    plt.subplots_adjust(left=0.1)
+    plt.figure(figsize=(6,6))
+    plt.pie(p, autopct="%d%%", labels = l, colors = c, counterclock=False, startangle=90, radius=1.0, center=(0, 0), pctdistance=0.7)
+    plt.subplots_adjust(left=0.2)
     
     graph = Output_Graph()
     return graph
