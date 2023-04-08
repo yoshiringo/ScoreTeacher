@@ -41,6 +41,10 @@
     float:left;
 }
 
+.width200 {
+    width: 300px;
+}
+
 .width150 {
     width: 150px;
 }

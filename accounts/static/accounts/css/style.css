@@ -10,3 +10,13 @@ li{
 #password{
     font-size: 15px;
 }
+  
+#accounts {
+    background-color: rgba(255, 255, 255, 0.5); /* 親要素の背景色を透明度 0.5 に指定 */
+    opacity: 1; /* 親要素の透明度を 1 に指定 */
+  }
+  
+  #accounts > * {
+    background-color: #fff; /* 子要素の背景色を白に指定 */
+    background-color: rgba(255, 255, 255, 0);
+  }

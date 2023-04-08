@@ -5,8 +5,8 @@ from django.core.exceptions import ValidationError
 
 class AccountForm(forms.ModelForm):
     # パスワード入力：非表示対応
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder':'パスワード', 'pattern':'^[A-Za-z0-9]+$'}),label="パスワード")
-    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder':'パスワード(確認用)', 'pattern':'^[A-Za-z0-9]{8,24}$'}),label="パスワード(確認用)")
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'pattern':'^[A-Za-z0-9]+$'}),label="パスワード")
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'pattern':'^[A-Za-z0-9]{8,24}$'}),label="パスワード(確認用)")
 
     def clean_password(self):
         password = self.cleaned_data['password']
@@ -34,5 +34,5 @@ class AccountForm(forms.ModelForm):
         # フィールド名指定
         labels = {'username':"ユーザーID"}
         widgets =   {
-            'username': forms.TextInput(attrs={'placeholder' : 'ユーザー名'}),
+            'username': forms.TextInput(),
         }

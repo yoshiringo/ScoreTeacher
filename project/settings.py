@@ -99,11 +99,11 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'scoredb', # 作成したデータベース名
-        'USER': 'postgres', # 作成したユーザー名
-        'PASSWORD': '0kikokiko', # パスワード
-        'HOST': 'localhost', # localhostがデフォルト
-        'PORT': '5432' # 基本設定で5432
+        'NAME': 'scoredb', 
+        'USER': 'postgres', 
+        'PASSWORD': '0kikokiko', 
+        'HOST': 'localhost', 
+        'PORT': '5432'
     }
 }
 
