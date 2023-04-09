@@ -1,19 +1,3 @@
-django~=3.2.1
-django-pandas~=0.6.6
-beautifulsoup4
-django-bootstrap4
-django-bootstrap-datepicker-plus
-django-mdeditor~=0.1.18
-Markdown~=3.3.6
-plotly
-django-import-export
-matplotlib
-django[argon2]
-django-bootstrap5
-bulma
-django-widget-tweaks
-scikit-learn
-statsmodels
-pytest-django
-mixer[django]
-mysqlclient
+-r requirements-dev.txt
+gunicorn
+mysqlclient==2.0.3

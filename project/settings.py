@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 from django.contrib import messages
+import environ
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,6 +53,7 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'django.contrib.humanize',
     'widget_tweaks',
+    'app.apps.AppConfig'
 ]
 
 MIDDLEWARE = [
@@ -95,16 +98,13 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+env = environ.Env()
+env.read_env(os.path.join(BASE_DIR, '.env'))
+SECRET_KEY = env('SECRET_KEY')
+DEBUG = env('DEBUG')
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'scoredb', 
-        'USER': 'root', 
-        'PASSWORD': '', 
-        'HOST': '', 
-        'PORT': ''
-    }
+    'default': env.db(),
 }
 
 
@@ -168,3 +168,4 @@ SEX = [
     ("男性", "男性"),
     ("女性", "女性"),
 ]
+
