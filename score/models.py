@@ -31,7 +31,7 @@ class Stat(models.Model):
     ob = models.PositiveSmallIntegerField(verbose_name='OB', blank=False, null=False)
     bunker = models.PositiveSmallIntegerField(verbose_name='バンカー数', blank=False, null=False)
     penalty = models.PositiveSmallIntegerField(verbose_name='ペナルティ率', blank=False, null=False)
-    stat_number = models.IntegerField(null=True)
+    stat_number = models.BigIntegerField(null=True)
 
     def __str__(self):
         return f'#{self.pk} {self.player}'

@@ -826,7 +826,7 @@ def csv_format(request):
     filename = urllib.parse.quote((u'score_teacher_csvフォーマット.csv').encode("utf8"))
     response['Content-Disposition'] = 'attachment; filename*=UTF-8\'\'{}'.format(filename)
     writer = csv.writer(response)
-    header = ["プレイヤー名","プレイヤーナンバー一人一つの番号をつけて下さい（重複不可）","年齢","性別","ラウンド日（下記の形式で入力）","スコア","パット数","フェアウェイキープ率","パーオン率","OB数","バンカー数","ペナルティ数","ラウンドナンバー一ラウンド一つの番号をつけて下さい（重複不可）"]
+    header = ["プレイヤー名","プレイヤーナンバー一人一つの番号をつけて下さい（重複不可）","年齢","性別(男性or女性)","ラウンド日（例:2023-03-12）","スコア","パット数","フェアウェイキープ率","パーオン率","OB数","バンカー数","ペナルティ数","ラウンドナンバー一ラウンド一つの番号をつけて下さい（重複不可）"]
     writer.writerow(header)
 
     return response
