@@ -1,0 +1,78 @@
+{% load static %}
+{% load django_bootstrap5 %}
+
+<!DOCTYPE html>
+
+{% block content %}
+<html lang="ja" dir="ltr">
+<link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
+<head>
+<meta charset="utf-8">
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+</head>
+
+<body>
+  <body background="{% static 'accounts/img/golf-g69cefbbf7_1920.jpg' %}"></body>
+  <div id="accounts" class="w-50 h-0 position-relative top-0 start-50 translate-middle-x text-center fw-bold text-dark border border-3">
+    <div class="register">
+      {% include "accounts/components/header.html" %}
+      {% if AccountCreate %}
+      <h1 class = "fw-bold w-50 position-relative top-0 start-50 translate-middle-x mt-5">登録完了</h1>
+      {% else %} 
+
+      <h2 class="p-3 fs-1 fw-bold text-black">新規登録</h2>
+
+      <form enctype="multipart/form-data" method="post">
+    
+        {% csrf_token %}
+        <ul class="px-0 position-relative start-0 fw-bold text-dark fs-4">
+          <li>
+            <dl class="row row-cols-2 fw-bold text-dark">
+              <dt class="p-3 text-end fw-bold">ユーザー名:</dt>
+              <dd class="p-3  text-start">{{ account_form.username }}</dd>
+            </dl>
+          </li>
+          <li>
+            <dl class="row row-cols-2 m-0">
+              <dt class="p-3  text-end fw-bold">パスワード:</dt>
+              <dd class="p-3  text-start">{{ account_form.password }}<br><p id="password" class="opacity-50">※8文字以上24文字以内の<br>半角英数字のみ入力可能です</p></dd>
+            </dl>
+          </li>
+          <li>
+            <dl class="row row-cols-2 m-0">
+              <dt class="p-3  text-end">パスワード(確認用):</dt>
+              <dd class="p-3  text-start">{{ account_form.confirm_password }}</dd>
+            </dl>
+          </li>
+          <li class="p-3">
+            <dl>
+              <dt>
+                <input class="btn btn-danger btn-lg position-relative top-50 fs-5" type="submit" name="" value="会員登録">
+              </dt>
+            </dl>
+          </li>
+        </ul>
+      </form>
+      {% endif %}
+
+      {% if error_message %}
+      <div class="alert alert-danger w-50 position-relative top-0 start-50 translate-middle-x text-center">
+          {% for field, errors in error_message.items %}
+              {% for error in errors %}
+                  {{ error }}
+              {% endfor %}
+              <br>
+          {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    <div class="position-relative top-0 start-50 translate-middle-x text-center mb-5">
+      <a class="btn m-3 bg-primary text-light fw-bold fs-5" href="{% url 'accounts:login' %}">ログイン画面へ</a>
+    </div>
+  </div>
+
+
+</body>
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% load django_bootstrap5 %}
+{% load score %}
+
+<nav>
+  <ul class="pagination">
+    <!-- 前ページのリンク -->
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?{% url_replace request 'page' page_obj.previous_page_number %}">前</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <p class="page-link">前</p>
+      </li>
+    {% endif %}
+
+    <!-- 数字の繰り返し部分 -->
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <li class="page-item active"><a class="page-link" href="#!">{{ num }}</a></li>
+      {% else %}
+        <li class="page-item"><a class="page-link" href="?{%  url_replace request 'page' num %}">{{ num }}</a></li>
+      {% endif %}
+    {% endfor %}
+
+    <!-- 前ページのリンク -->
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?{% url_replace request 'page' page_obj.next_page_number %}">次</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <p class="page-link">次</p>
+      </li>
+    {% endif %}
+  </ul>
+</nav> 

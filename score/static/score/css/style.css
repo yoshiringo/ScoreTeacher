@@ -1,0 +1,67 @@
+.clicktxt {
+    color:#ffffff;
+    background-color: #4169e1;
+    padding:15px;
+    border-radius: 10px;
+    }
+    
+.switchdsp input {
+    display: none;
+    }
+    
+.switchdsp .dsp {
+    padding: 0px 10px 0px 10px;
+    height: 0;
+    overflow: hidden;
+    transition: 0.2s;
+    opacity: 0;
+    }
+    
+.switchdsp input:checked ~ .dsp {
+    padding: 15px 25px 0px 25px;
+    height: auto;
+    opacity: 1;
+    }
+
+.arrow-right {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin: 0 10px;
+    border-top: 4px solid #000;
+    border-right: 4px solid #000;
+    transform: rotate(45deg);
+    }
+
+.width200 {
+    width: 200px;
+}
+
+.left {
+    float:left;
+}
+
+.width200 {
+    width: 300px;
+}
+
+.width150 {
+    width: 150px;
+}
+
+.width120 {
+    width: 120px;
+}
+
+.width100 {
+    width: 50px;
+}
+
+.br_::after {
+    content: "\A";
+    white-space: pre;
+  }
+
+.clear{
+    clear: both;
+    }

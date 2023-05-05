@@ -1,0 +1,24 @@
+{% extends "score/base.html" %}
+{% load static %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+{% include "score/components/person_table.html" %}
+{% include "score/components/person_delete_modal.html" %}
+
+<script type="text/javascript">
+
+    const deleteModalButtons = document.getElementsByClassName('delete-modal-button');
+  
+    const deleteForm = document.getElementById('delete-form');
+    const deleteName = document.getElementById('delete-name')
+  
+    for (const button of deleteModalButtons) {
+      button.addEventListener('click', () => {
+        deleteForm.action = button.dataset.deleteurl;
+        deleteName.textContent = `Name : ${button.dataset.name}`;
+      });
+    }
+  </script>
+
+{% endblock %}

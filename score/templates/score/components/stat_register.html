@@ -1,0 +1,25 @@
+<form method="POST"> {% csrf_token %}
+    <div class="mt-3">
+        <p class="width150 left me-3 border-bottom">ラウンド日</p>
+        <p class="width120 left me-3 border-bottom">スコア</p>
+        <p class="width120 left me-3 border-bottom">パット数</p>
+        <p class="width120 left me-3 border-bottom">FWキープ率</p>
+        <p class="width120 left me-3 border-bottom">パーオン率</p>
+        <p class="width120 left me-3 border-bottom">OB数</p>
+        <p class="width120 left me-3 border-bottom">バンカー数</p>
+        <p class="width120 left me-3 border-bottom">ペナルティ数</p>
+    </div>
+    <div class="mt-3 clear">
+      <p class="width150 left me-3">{{form.date}}</p>
+      <p class="width120 left me-3">{{form.total_score}}</p>
+      <p class="width120 left me-3">{{form.putt}}</p>
+      <p class="width120 left me-3">{{form.fw}}</p>
+      <p class="width120 left me-3">{{form.par_on}}</p>
+      <p class="width120 left me-3">{{form.ob}}</p>
+      <p class="width120 left me-3">{{form.bunker}}</p>
+      <p class="width120 left br_">{{form.penalty}}</p>
+    </div>
+    <div class="clear">
+      <button type="submit" class="btn btn-primary fw-bold">スコアを登録する</button>
+    </div>  
+</form>

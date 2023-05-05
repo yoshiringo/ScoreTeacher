@@ -1,0 +1,29 @@
+{% extends "score/base.html" %}
+{% load django_bootstrap5 %}
+{% load humanize %}
+{% block content %}
+{% autoescape off %}
+
+<html>
+<head></head>
+<body>
+    <h1>{{ person_stat.name }}さんの分析結果</h1>
+</body>
+<div class="card">
+    <div class="card-header text-white bg-info text-center ls-widest font-weight-bold">
+      分析結果
+    </div>
+    <div class="card-body p-3" style="text-align: center">
+      <img src="data:image/png;base64,{{ chart| safe }}" width="600" height="600" onerror="this.style.display='none'"/>
+      <p class="fs-3 fw-bold">{{ result_a }}の順番でスコアに関係あるようです。</p>
+  </div>
+</div>
+</html>
+
+{% endautoescape %}
+{% endblock %}
+
+{% block extrajs %}
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}

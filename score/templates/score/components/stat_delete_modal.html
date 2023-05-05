@@ -1,0 +1,26 @@
+<div class="modal fade" id="statDeleteModal" tabindex="-1" aria-labelledby="statDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <!-- actionは動的に設定 -->
+        <form class="mt-5" id="delete-form" method="POST">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title" id="statDeleteModalLabel">Stats削除</h5>
+            <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>このデータを削除してよろしいですか？</p>
+            <!-- ここを動的に設定 -->
+            <p id="delete-date"></p>
+            <p id="delete-total_score"></p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-danger" type="submit" name="button">はい</button>
+            <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">
+              いいえ
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>

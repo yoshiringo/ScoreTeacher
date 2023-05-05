@@ -1,0 +1,115 @@
+{% load static %}
+{% load django_bootstrap5 %}
+{% load humanize %}
+
+<table class="table fs-5 bg-light">
+    
+    <thead>
+        {% bootstrap_css %}
+        {% bootstrap_javascript %}
+        <tr>
+            <th class="p-1 border-bottom-5 border-primary">ラウンド日</th>
+            <th class="p-1">スコア</th>
+            <th class="p-1 border-bottom border-primary">パット</th>
+            <th class="p-1">FWキープ</th>
+            <th class="p-1 border-bottom border-primary">パーオン</th>
+            <th class="p-1">OB</th>
+            <th class="p-1 border-bottom border-primary">バンカー</th>
+            <th class="p-1">ペナルティ</th>
+
+            <th scope="col"></th>
+        </tr>
+        
+    </thead>
+
+    <tbody>
+        {% for stat in stat_p  %}
+        <tr>
+            <th>{{ stat.date|date:'Y-m-d'  }}</th>
+            <th>{{ stat.total_score }}</th>
+            <th>{{ stat.putt }}</th>
+            <th>{{ stat.fw }}%</th>
+            <th>{{ stat.par_on }}%</th>
+            <th>{{ stat.ob }}</th>
+            <th>{{ stat.bunker }}</th>
+            <th>{{ stat.penalty }}</th>
+
+            <th>
+                <button type="button" class="btn btn-rounded btn-sm btn-danger delete-modal-button"
+                data-mdb-toggle="modal"
+                data-mdb-target="#statDeleteModal"
+                data-deleteurl="{% url 'score:stat_delete' stat.pk %}"
+                data-date="{{ stat.date|date:'Y-m-d' }}"
+                data-total_score="{{ stat.total_score }}">
+                削除
+                </button>
+            </th>
+        </tr>
+        
+        {% endfor %}
+    </tbody>
+    
+    <tbody>
+        
+        {% if check == False %}
+        <tr>
+            <th class="p-3 fs-4 fw-bold">スコアを入力してください</th>
+        </tr>
+        {% else %}
+        
+        <tr class="fs-4">
+            <th class="fw-bold">平均</th>
+            <th>{{ score_avg }}</th>
+            <th>{{ putt_avg }}</th>
+            <th>{{ fw_avg }}%</th>
+            <th>{{ par_on_avg }}%</th>
+            <th>{{ ob_avg }}回</th>
+            <th>{{ bunker_avg }}回</th>
+            <th>{{ penalty_avg }}回</th>            
+        </tr>
+        
+        <tr>
+            <th><a href="{% url 'score:stat_analyze' person.pk %}">分析結果を表示する</a></th>
+        </tr>
+        {% endif %}
+
+        
+        
+    </tbody>
+    
+</table>
+
+
+
+<nav aria-label="Page navigation example">
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <ul class="pagination">
+        {% if stat_p.has_previous %}
+            <li class="page-item"><a class="page-link" href="?p={{ stat_p.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        {% if stat_p.has_next %}
+            <li class="page-item"><a class="page-link" href="?p={{ stat_p.next_page_number }}">Next</a></li>
+        {% endif %}
+        {% if stat_p.has_previous %}
+            {% if stat_p.previous_page_number != 1 %}
+                <li class="page-item"><a class="page-link" href="?p=1">1</a></li>
+            {% endif %}
+                <li class="page-item"><a class="page-link" href="?p={{ stat_p.previous_page_number }}">{{ stat_p.previous_page_number }}</a></li>
+        {% endif %}
+        <li class="page-item"><a class="page-link" href="?p={{ stat_p.number }}" >{{ stat_p.number }}</a></li>
+        {% if stat_p.has_next %}
+            <li class="page-item"><a class="page-link" href="?p={{ stat_p.next_page_number }}">{{ stat_p.next_page_number }}</a></li>
+            {% if stat_p.next_page_number != stat_p.paginator.num_pages %}
+                <li class="page-item"><a class="page-link" href="?p={{ stat_p.paginator.num_pages }}">{{ stat_p.paginator.num_pages }}</a></li>
+            {% endif %}
+        {% endif %}
+    </ul>
+</nav>
+
+<nav class="width200 navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <h4 class="fw-bold">スコア入力欄</h4>
+      <i class="fas fa-arrow-circle-down"></i>
+    </div>
+</nav>
