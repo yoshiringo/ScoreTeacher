@@ -1,9 +1,7 @@
-from email.policy import default
-from tabnanny import verbose
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
-
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
@@ -37,3 +35,4 @@ class Stat(models.Model):
 
     def __str__(self):
         return f'#{self.pk} {self.player}'
+

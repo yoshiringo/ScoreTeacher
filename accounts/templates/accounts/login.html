@@ -46,8 +46,11 @@
          <div class="p-2 mb-5 border-top border-5 border-success w-50 h-0 position-relative start-50 translate-middle-x text-center property mt-5">
             <p class="m-3 fs-2 fw-bold text-black">初めての方はこちら</p>
             <a class="btn m-3 bg-danger fs-4 text-light fw-bold" href="{% url 'accounts:register' %}">アカウントを作成</a>
+            <a class="btn mt-3 bg-primary fs-5 text-light fw-bold" href="{% url 'accounts:guest_login' %}">ゲストログイン</a>
          </div>
       </div>
 </body>
 </html>
+
+
 {% endblock %}

@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.contrib.auth.models import User
 
 class  AccountRegistration(TemplateView):
 
@@ -88,3 +89,12 @@ def home(request):
     params = {"UserID":request.user,}
     return render(request, "score/index.html",context=params)
 
+def guest_login(request):
+    # ユーザーを取得
+    user = User.objects.get(username='guestuser')
+    # ユーザー認証
+    user = authenticate(request, username=user.username, password="guest123456")
+    # ログイン
+    if user is not None:
+        login(request, user)
+        return redirect('score:person_list')

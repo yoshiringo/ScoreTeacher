@@ -15,6 +15,11 @@ from django.contrib import messages
 import environ
 import os
 
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+env.read_env('.env')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = BASE_DIR / "Template"
@@ -30,13 +35,12 @@ MEDIA_URL = "media/"
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-lsz0iq8go*0p_%)ros@!lr0e)-#l%w9i)9k@qk=r6e%h@^^fu#'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -53,7 +57,6 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'django.contrib.humanize',
     'widget_tweaks',
-    'app.apps.AppConfig'
 ]
 
 MIDDLEWARE = [
@@ -86,27 +89,21 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-            'builtins':[ 
-                'bootstrap4.templatetags.bootstrap4',
-            ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'project.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-env = environ.Env()
-env.read_env(os.path.join(BASE_DIR, '.env'))
-SECRET_KEY = env('SECRET_KEY')
-DEBUG = env('DEBUG')
-
 DATABASES = {
-    'default': env.db(),
-}
-
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'scoredb', 
+        'USER': 'root', 
+        'PASSWORD': '0kikokiko', 
+        'HOST': 'localhost', 
+        'PORT': '3306'}
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -168,4 +165,3 @@ SEX = [
     ("男性", "男性"),
     ("女性", "女性"),
 ]
-

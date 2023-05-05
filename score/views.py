@@ -635,7 +635,7 @@ class CsvImport(generic.FormView):
         csv_file = csv.reader(form_data)
         # 1行ずつ取り出し、作成していく
         if form_data.name.endswith('.csv'):
-        
+            successful = True  # 全てのデータを登録できたかどうかのフラグ
             for line in csv_file:
                 try:
                     #異なるログインユーザーであれば同じplayer_numberでも登録したいので、player_numberを工夫
@@ -667,11 +667,14 @@ class CsvImport(generic.FormView):
                             bunker = line[10],
                             penalty = line[11]
                         )
-
                 except:
-                    #csvの内容が間違っている場合はエラーメッセージ表示
-                    messages.add_message(self.request, messages.ERROR, "内容が正しいか確認して下さい")
-                    return redirect('score:csv_import')
+                    successful = False  # データ登録に失敗した場合、フラグをFalseにする
+        
+            if successful:
+                return super().form_valid(form)
+            else:
+                messages.add_message(self.request, messages.ERROR, "内容が正しいか確認して下さい")
+                return redirect('score:csv_import')
         
             return super().form_valid(form)
             
@@ -827,3 +830,4 @@ def csv_format(request):
     writer.writerow(header)
 
     return response
+

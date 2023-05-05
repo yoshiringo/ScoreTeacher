@@ -10,4 +10,5 @@ urlpatterns =[
     path("logout",views.Logout,name="logout"),
     path('register',views.AccountRegistration.as_view(), name='register'),
     path("home",views.home,name="home"),
+    path("guest_login",views.guest_login,name="guest_login"),
 ]
