@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-lsz0iq8go*0p_%)ros@!lr0e)-#l%w9i)9k@qk=r6e%h@^^fu#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['scoreteacher5-5-dev.ap-northeast-1.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['scoreteacher.com']
 # ALLOWED_HOSTS = []
 
 # Application definition
