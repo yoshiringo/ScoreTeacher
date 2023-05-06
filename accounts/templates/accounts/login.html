@@ -5,16 +5,17 @@
 
 {% block content %}
 <html lang="ja" dir="ltr">
-<link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 {% bootstrap_css %}
 {% bootstrap_javascript %}
+<link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
 </head>
 
 <body>
    <body background="{% static 'accounts/img/golf-g69cefbbf7_1920.jpg' %}"></body>
-      <div id="accounts" class="w-50 h-0 position-relative top-0 start-50 translate-middle-x text-center border border-3">
+      <div id="accounts" class="container position-relative text-center border border-3">
          <div class="login">
             {% include "accounts/components/header.html" %}
             <h1 class="p-3 fw-bold text-black">ログイン画面</h1>
@@ -23,15 +24,22 @@
                <form method="post" action="{% url 'accounts:login' %}">
                   {% csrf_token %}
          
-                  <table class="fs-5 text-black">
-                  <tr>
-                  <td><label for="userid">ユーザーID:</label></td>
-                  <td><input type="text" name="userid"></td>
-                  <td>　</td>
-                  <td><label for="password">パスワード：</label></td>
-                  <td><input type="password" name="password"></td>
-                  </tr>
-                  </table>
+                  <div class="row fs-5 text-black mb-3">
+                     <div class="col-md-4">
+                        <label for="userid">ユーザーID:</label>
+                     </div>
+                     <div class="col-md-8">
+                        <input type="text" name="userid" class="form-control">
+                     </div>
+                  </div>
+                  <div class="row fs-5 text-black mb-3">
+                     <div class="col-md-4">
+                        <label for="password">パスワード：</label>
+                     </div>
+                     <div class="col-md-8">
+                        <input type="password" name="password" class="form-control">
+                     </div>
+                  </div>
          
                   <input type="submit" class="btn m-3 fs-5 bg-danger text-light" value="login">
                   {% for message in messages %}
@@ -43,7 +51,7 @@
             </div>
          </div>
          
-         <div class="p-2 mb-5 border-top border-5 border-success w-50 h-0 position-relative start-50 translate-middle-x text-center property mt-5">
+         <div class="p-2 mb-5 border-top border-5 border-success text-center property mt-5">
             <p class="m-3 fs-2 fw-bold text-black">初めての方はこちら</p>
             <a class="btn m-3 bg-danger fs-4 text-light fw-bold" href="{% url 'accounts:register' %}">アカウントを作成</a>
             <a class="btn mt-3 bg-primary fs-5 text-light fw-bold" href="{% url 'accounts:guest_login' %}">ゲストログイン</a>
@@ -51,6 +59,5 @@
       </div>
 </body>
 </html>
-
 
 {% endblock %}
