@@ -17,6 +17,7 @@ from sklearn.linear_model import LinearRegression
 import numpy as np
 from django.http import HttpResponse
 import csv,urllib
+import chardet
 
 #プレイヤー一覧ページ
 class PersonList(generic.ListView):
@@ -139,7 +140,6 @@ class StatCreate(generic.CreateView):
 class StatAnalyze(generic.DetailView):
     model = Person
     template_name = "score/stat_analyze.html"
-    context_object_name = "person_stat"
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -630,56 +630,62 @@ class CsvImport(generic.FormView):
     form_class = CSVUploadForm
 
     def form_valid(self, form):
-        # csv.readerに渡すため、TextIOWrapperでテキストモードなファイルに変換
-        form_data = io.TextIOWrapper(form.cleaned_data['file'], encoding='utf-8')
-        csv_file = csv.reader(form_data)
-        # 1行ずつ取り出し、作成していく
-        if form_data.name.endswith('.csv'):
-            successful = True  # 全てのデータを登録できたかどうかのフラグ
-            for line in csv_file:
-                try:
-                    #異なるログインユーザーであれば同じplayer_numberでも登録したいので、player_numberを工夫
-                    #読み込もうとしているプレイヤーが既に登録されていないかチェック
-                    if f'[{self.request.user.id}]' != list(Person.objects.values_list('login_user', flat=True).filter(player_number=int(f'{self.request.user.id}'+"000000"+f'{line[1]}'))):
-                        person, created = Person.objects.get_or_create(player_number=int(f'{self.request.user.id}'+"000000"+f'{line[1]}'))
-                        person.login_user = self.request.user.id
-                        person.name =line[0]
-                        person.age = line[2]
-                        person.sex = line[3]
-                        person.save()
+        file_encoding = chardet.detect(form.cleaned_data['file'].read())['encoding']
+        form.cleaned_data['file'].seek(0)
 
-                    stat_number_check =list(Stat.objects.values("stat_number").all())
-                    stat_number_check = f'{stat_number_check}'
-                    stat_number_check = stat_number_check.replace("}", "")
-                    s_check = int(f'{self.request.user.id}'+"000000"+f'{line[12]}')
-                    #読み込もうとしているスタッツが既に登録されていないかチェック
-                    if f': {s_check},' not in f'{stat_number_check}' and f': {s_check}]' not in f'{stat_number_check}':
-                    
-                        Stat.objects.create(
-                            player = Person.objects.get(player_number=int(f'{self.request.user.id}'+"000000"f'{line[1]}')),
-                            stat_number = int(f'{self.request.user.id}'+"000000"+f'{line[12]}'),
-                            date = line[4],
-                            total_score = line[5],
-                            putt = line[6],
-                            fw = line[7],
-                            par_on = line[8],
-                            ob = line[9],
-                            bunker = line[10],
-                            penalty = line[11]
-                        )
-                except:
-                    successful = False  # データ登録に失敗した場合、フラグをFalseにする
-        
-            if successful:
-                return super().form_valid(form)
-            else:
-                messages.add_message(self.request, messages.ERROR, "内容が正しいか確認して下さい")
-                return redirect('score:csv_import')
-        
-            return super().form_valid(form)
+        # Check if the detected encoding is utf-8
+        if file_encoding is not None and file_encoding.lower() == 'utf-8':
+            # csv.readerに渡すため、TextIOWrapperでテキストモードなファイルに変換
+            form_data = io.TextIOWrapper(form.cleaned_data['file'], encoding='utf-8')
+            csv_file = csv.reader(form_data)
+            # 1行ずつ取り出し、作成していく
+            if form_data.name.endswith('.csv'):
+                successful = True  # 全てのデータを登録できたかどうかのフラグ
+                for line in csv_file:
+                    try:
+                        #異なるログインユーザーであれば同じplayer_numberでも登録したいので、player_numberを工夫
+                        #読み込もうとしているプレイヤーが既に登録されていないかチェック
+                        if f'[{self.request.user.id}]' != list(Person.objects.values_list('login_user', flat=True).filter(player_number=int(f'{self.request.user.id}'+"000000"+f'{line[1]}'))):
+                            person, created = Person.objects.get_or_create(player_number=int(f'{self.request.user.id}'+"000000"+f'{line[1]}'))
+                            person.login_user = self.request.user.id
+                            person.name =line[0]
+                            person.age = line[2]
+                            person.sex = line[3]
+                            person.save()
+
+                        stat_number_check =list(Stat.objects.values("stat_number").all())
+                        stat_number_check = f'{stat_number_check}'
+                        stat_number_check = stat_number_check.replace("}", "")
+                        s_check = int(f'{self.request.user.id}'+"000000"+f'{line[12]}')
+                        #読み込もうとしているスタッツが既に登録されていないかチェック
+                        if f': {s_check},' not in f'{stat_number_check}' and f': {s_check}]' not in f'{stat_number_check}':
+                        
+                            Stat.objects.create(
+                                player = Person.objects.get(player_number=int(f'{self.request.user.id}'+"000000"f'{line[1]}')),
+                                stat_number = int(f'{self.request.user.id}'+"000000"+f'{line[12]}'),
+                                date = line[4],
+                                total_score = line[5],
+                                putt = line[6],
+                                fw = line[7],
+                                par_on = line[8],
+                                ob = line[9],
+                                bunker = line[10],
+                                penalty = line[11]
+                            )
+                    except:
+                        successful = False  # データ登録に失敗した場合、フラグをFalseにする
             
+                if successful:
+                    return super().form_valid(form)
+                else:
+                    return redirect('score:person_list')
+                return super().form_valid(form)
+                    
+            else:
+                messages.add_message(self.request, messages.ERROR, "csvファイルを選択してください")
+                return redirect('score:csv_import')
         else:
-            messages.add_message(self.request, messages.ERROR, "csvファイルを選択してください")
+            messages.add_message(self.request, messages.ERROR, "文字コードがUTF-8のcsvファイルを選択してください。")
             return redirect('score:csv_import')
 
 #csvエクスポート
@@ -821,6 +827,7 @@ def csv_export(request):
                              
     return response
 
+#csvフォーマット
 def csv_format(request):
     response = HttpResponse(content_type='text/csv; charset=Shift-JIS')
     filename = urllib.parse.quote((u'score_teacher_csvフォーマット.csv').encode("utf8"))

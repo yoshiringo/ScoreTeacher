@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 from django.contrib import messages
 import os
+import environ
+
+env = environ.Env()
+env.read_env('.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,8 +38,8 @@ SECRET_KEY = 'django-insecure-lsz0iq8go*0p_%)ros@!lr0e)-#l%w9i)9k@qk=r6e%h@^^fu#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['scoreteacher.com']
-# ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['scoreteacher.com']
+ALLOWED_HOSTS = ['scoreteacher5-25-dev.ap-northeast-1.elasticbeanstalk.com']
 
 # Application definition
 
@@ -102,7 +106,19 @@ if 'RDS_DB_NAME' in os.environ:
             'PORT': os.environ['RDS_PORT'],
         }
     }
-
+    """
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'scoredb', 
+            'USER': env('DB_USERNAME'), 
+            'PASSWORD': env('DB_PASS'), 
+            'HOST': 'localhost', 
+            'PORT': '5432'
+        }
+    }
+"""
 else:
     DATABASES = {
         'default': {
@@ -114,6 +130,7 @@ else:
             'PORT': '5432'
         }
     }
+
 
 if 'AWS_STORAGE_BUCKET_NAME' in os.environ:
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
