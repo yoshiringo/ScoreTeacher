@@ -106,19 +106,7 @@ if 'RDS_DB_NAME' in os.environ:
             'PORT': os.environ['RDS_PORT'],
         }
     }
-    """
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'scoredb', 
-            'USER': env('DB_USERNAME'), 
-            'PASSWORD': env('DB_PASS'), 
-            'HOST': 'localhost', 
-            'PORT': '5432'
-        }
-    }
-"""
+
 else:
     DATABASES = {
         'default': {
@@ -131,6 +119,19 @@ else:
         }
     }
 
+"""
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'scoredb', 
+            'USER': env('DB_USERNAME'), 
+            'PASSWORD': env('DB_PASS'), 
+            'HOST': 'localhost', 
+            'PORT': '5432'
+        }
+    }
+"""
 
 if 'AWS_STORAGE_BUCKET_NAME' in os.environ:
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
